@@ -1,0 +1,65 @@
+@extends('layouts.siswa')
+
+@section('title', 'Daftar Ujian')
+
+@push('styles')
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Animasi dan efek untuk tampilan yang lebih dinamis */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            opacity: 0;
+            transform: rotate(30deg) translateX(-100%);
+        }
+        20% {
+            opacity: 0.2;
+        }
+        100% {
+            opacity: 0;
+            transform: rotate(30deg) translateX(100%);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in-out forwards;
+    }
+    
+    .exam-card {
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+        background: white;
+        position: relative;
+        animation: fadeIn 0.5s ease-in-out forwards;
+        animation-delay: calc(var(--animation-order) * 0.1s);
+        opacity: 0;
+    }
+    
+    .exam-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.15), 0 6px 6px rgba(79, 70, 229, 0.1);
+    }
+    
+    .exam-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            to right,
+            rgba(255,255,

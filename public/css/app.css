@@ -1,0 +1,174 @@
+/* Custom styles for the application */
+
+/* Fix for AlpineJS elements to prevent flashing */
+[x-cloak] { 
+    display: none !important; 
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c7d2fe;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a5b4fc;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+/* Custom transitions */
+.transition-smooth {
+    transition: all 0.3s ease;
+}
+
+/* Custom shadows */
+.shadow-card {
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Custom CSS */
+
+/* Animation Definitions */
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Animation Classes */
+.animate-slide-left {
+  animation: slideInFromLeft 0.5s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInFromRight 0.5s ease-out;
+}
+
+.animate-fade-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Staggered Animations */
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom button styles */
+.btn-gradient {
+  background: linear-gradient(45deg, #4338ca, #6366f1);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(45deg, #3730a3, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Fix for Font Awesome & Material Icons */
+.fas, .fab, .far, .fal, .fad, .material-icons {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+/* Icon backgrounds for dashboard cards */
+.icon-bg {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.student-card .icon-bg {
+    background-color: rgba(79, 129, 255, 0.15);
+    color: #4F81FF;
+}
+
+.teacher-card .icon-bg {
+    background-color: rgba(72, 223, 157, 0.15);
+    color: #48DF9D;
+}
+
+.class-card .icon-bg {
+    background-color: rgba(161, 97, 255, 0.15);
+    color: #A161FF;
+}
+
+.subject-card .icon-bg {
+    background-color: rgba(255, 175, 56, 0.15);
+    color: #FFAF38;
+}
+
+/* Ensure proper sizing and spacing for icons */
+.fa-2x {
+    font-size: 1.5em !important;
+}
+
+/* Fix for sidebar menu icons */
+.sidebar .menu-section h3 i,
+.sidebar-menu ul li a i {
+    margin-right: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Ensure proper visibility of icons */
+.btn i {
+    margin-right: 5px;
+}

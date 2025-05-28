@@ -1,0 +1,148 @@
+/* Sidebar styling */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #4151b5;
+    color: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.logo {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar .logo img {
+    width: 100px !important;
+    height: 100px !important;
+    object-fit: cover !important;
+    border-radius: 10% !important;
+    margin: 0 auto 15px !important;
+    display: block !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.logo h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 5px 0;
+}
+
+.logo p {
+    font-size: 12px;
+    opacity: 0.7;
+    margin: 0;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-section {
+    margin-bottom: 20px;
+}
+
+.menu-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 0 20px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+}
+
+.menu-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-section li {
+    position: relative;
+}
+
+.menu-section a {
+    display: block;
+    padding: 8px 20px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.menu-section a:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.sidebar-icon {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.user-info {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-details h4 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.user-details p {
+    font-size: 12px;
+    opacity: 0.7;
+    margin: 0;
+}
+
+.logout-button {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.logout-button a {
+    display: block;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.logout-button a:hover {
+    color: #fff;
+}
+
+a.active, 
+a.sidebar-link.active {
+    background-color: rgba(255,255,255,0.2);
+    border-left: 4px solid #fff;
+    color: #fff;
+}
+
+a.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
