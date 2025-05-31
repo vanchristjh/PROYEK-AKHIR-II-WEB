@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMAN1-GIRSIP - Fallback Statistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .bg-gradient-header {
+            background: linear-gradient(120deg, #4338ca, #3b82f6);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">SMAN1-GIRSIP</a>
+            <button onclick="window.history.back()" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Kembali
+            </button>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="bg-gradient-header mb-4">
+            <h1 class="h4">Statistik Tugas (Halaman Darurat)</h1>
+            <p class="mb-0">Halaman ini adalah alternatif jika tampilan utama tidak bekerja dengan baik.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Distribusi Nilai</h5>
+                        <div class="chart-container">
+                            <canvas id="scoresChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Timeline Pengumpulan</h5>
+                        <div class="chart-container">
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row gy-4">
+            <div class="col-md-3 col-6">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                        <h5>Total Siswa</h5>
+                        <h3 id="totalStudents">--</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-file-alt fa-2x text-success mb-3"></i>
+                        <h5>Pengumpulan</h5>
+                        <h3 id="totalSubmissions">--</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-warning mb-3"></i>
+                        <h5>Belum Dinilai</h5>
+                        <h3 id="pendingGrades">--</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-info mb-3"></i>
+                        <h5>Sudah Dinilai</h5>
+                        <h3 id="gradedCount">--</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/debug-statistics.html" class="btn btn-primary me-2">
+                <i class="fas fa-bug me-1"></i> Tampilan Debug
+            </a>
+            <button onclick="loadDataFromJSON()" class="btn btn-success me-2">
+                <i class="fas fa-sync me-1"></i> Muat Data
+            </button>
+            <button onclick="window.print()" class="btn btn-secondary">
+                <i class="fas fa-print me-1"></i> Cetak
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Create sample chart data for visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Default data
+            renderCharts({
+                scores: {
+                    labels: ['A (80-100)', 'B (70-79)', 'C (60-69)', 'D (50-59)', 'E (0-49)'],
+                    data: [12, 8, 5, 3, 2]
+                },
+                timeline: {
+                    labels: ['20 Mei', '21 Mei', '22 Mei', '23 Mei', '24 Mei'],
+                    data: [5, 8, 12, 5, 0]
+                },
+                stats: {
+                    totalStudents: 30,
+                    submissions: 28,
+                    pending: 5,
+                    graded: 23
+                }
+            });
+        });
+        
+        function loadDataFromJSON() {
+            // In a real application, this would fetch data from the server
+            alert('Dalam implementasi sebenarnya, ini akan memuat data dari server.');
+            
+            // For now, we'll just randomize our demo data
+            renderCharts({
+                scores: {
+                    labels: ['A (80-100)', 'B (70-79)', 'C (60-69)', 'D (50-59)', 'E (0-49)'],
+                    data: [
+                        Math.floor(Math.random() * 15) + 5,
+                        Math.floor(Math.random() * 10) + 3,
+                        Math.floor(Math.random() * 8) + 2,
+                        Math.floor(Math.random() * 5) + 1,
+                        Math.floor(Math.random() * 3)
+                    ]
+                },
+                timeline: {
+                    labels: ['20 Mei', '21 Mei', '22 Mei', '23 Mei', '24 Mei', '25 Mei'],
+                    data: [
+                        Math.floor(Math.random() * 7) + 1,
+                        Math.floor(Math.random() * 10) + 3,
+                        Math.floor(Math.random() * 15) + 5,
+                        Math.floor(Math.random() * 8) + 2,
+                        Math.floor(Math.random() * 5) + 1,
+                        Math.floor(Math.random() * 3)
+                    ]
+                },
+                stats: {
+                    totalStudents: 30,
+                    submissions: Math.floor(Math.random() * 5) + 25,
+                    pending: Math.floor(Math.random() * 8) + 2,
+                    graded: Math.floor(Math.random() * 15) + 10
+                }
+            });
+        }
+        
+        function renderCharts(data) {
+            // Update statistics
+            document.getElementById('totalStudents').textContent = data.stats.totalStudents;
+            document.getElementById('totalSubmissions').textContent = data.stats.submissions;
+            document.getElementById('pendingGrades').textContent = data.stats.pending;
+            document.getElementById('gradedCount').textContent = data.stats.graded;
+            
+            // Scores distribution chart
+            if (window.scoresChart) window.scoresChart.destroy();
+            window.scoresChart = new Chart(document.getElementById('scoresChart'), {
+                type: 'pie',
+                data: {
+                    labels: data.scores.labels,
+                    datasets: [{
+                        data: data.scores.data,
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(234, 179, 8, 0.7)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Timeline chart
+            if (window.timelineChart) window.timelineChart.destroy();
+            window.timelineChart = new Chart(document.getElementById('timelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.timeline.labels,
+                    datasets: [{
+                        label: 'Jumlah Pengumpulan',
+                        data: data.timeline.data,
+                        backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

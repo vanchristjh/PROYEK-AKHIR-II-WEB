@@ -1,42 +1,30 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'SMAN 1 Girsip') }}</title>
+    
+    <title>@yield('title', 'SMAN 1')</title>
     
     <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Add Font Awesome for icons -->
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Add Material Icons as backup -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">    <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <link href="{{ asset('css/sidebar.css') }}" rel="stylesheet">
     <link href="{{ asset('css/logo.css') }}" rel="stylesheet">
-    
-    <!-- Custom Icon Fix CSS -->
-    <style>
-        .icon-fix {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 24px;
-            min-height: 24px;
-        }
-        /* Ensure icons are visible with proper contrast */
-        .sidebar-icon {
-            color: rgba(255, 255, 255, 0.85);
-            margin-right: 8px;
-            font-size: 18px;
-        }
-    </style>
     
     @yield('styles')
 </head>
@@ -46,100 +34,97 @@
         @include('layouts.sidebar')
         
         <!-- Page Content -->
-        <div id="page-content-wrapper">
+        <div id="page-content-wrapper" class="flex-grow-1">
             <!-- Navbar -->
-            @include('layouts.navbar')
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container-fluid">
+                    <button class="btn" id="sidebar-collapse">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto">
+                            @guest
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('login') }}">Login</a>
+                                </li>
+                            @else
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {{ Auth::user()->name }}
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                            <i class="fas fa-user me-2"></i> Profile
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('logout') }}"
+                                               onclick="event.preventDefault();
+                                                             document.getElementById('logout-form').submit();">
+                                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                            </a>
+                                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                                @csrf
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endguest
+                        </ul>
+                    </div>
+                </div>
+            </nav>
             
             <!-- Main Content -->
             <div class="content-container">
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                
                 @yield('content')
             </div>
-            
-            <!-- Footer -->
-            <footer class="py-2 bg-white">
-                <div class="container-fluid">
-                    <div class="d-flex justify-content-between align-items-center small">
-                        <div>© {{ date('Y') }} SMAN 1 GIRSIP - Sistem Informasi Arsip Digital</div>
-                        <div>
-                            @if(auth()->user()->role->name == 'admin')
-                                @if(Route::has('admin.bantuan'))
-                                    <a href="{{ route('admin.bantuan') }}" class="nav-link">
-                                        <i class="fas fa-question-circle"></i>
-                                        <span>Bantuan</span>
-                                    </a>
-                                @endif
-                            @elseif(auth()->user()->role->name == 'siswa')
-                                @if(Route::has('siswa.bantuan'))
-                                    <a href="{{ route('siswa.bantuan') }}" class="nav-link">
-                                        <i class="fas fa-question-circle"></i>
-                                        <span>Bantuan</span>
-                                    </a>
-                                @endif
-                            @elseif(auth()->user()->role->name == 'guru')
-                                @if(Route::has('guru.bantuan'))
-                                    <a href="{{ route('guru.bantuan') }}" class="nav-link">
-                                        <i class="fas fa-question-circle"></i>
-                                        <span>Bantuan</span>
-                                    </a>
-                                @endif
-                            @endif
-                            |
-                            @if(auth()->user()->role->name == 'admin')
-                                @if(Route::has('admin.privasi'))
-                                    <a href="{{ route('admin.privasi') }}" class="nav-link">
-                                        <i class="fas fa-lock"></i>
-                                        <span>Kebijakan Privasi</span>
-                                    </a>
-                                @endif
-                            @elseif(auth()->user()->role->name == 'siswa')
-                                @if(Route::has('siswa.privasi'))
-                                    <a href="{{ route('siswa.privasi') }}" class="nav-link">
-                                        <i class="fas fa-lock"></i>
-                                        <span>Kebijakan Privasi</span>
-                                    </a>
-                                @endif
-                            @elseif(auth()->user()->role->name == 'guru')
-                                @if(Route::has('guru.privasi'))
-                                    <a href="{{ route('guru.privasi') }}" class="nav-link">
-                                        <i class="fas fa-lock"></i>
-                                        <span>Kebijakan Privasi</span>
-                                    </a>
-                                @endif
-                            @endif
-                            |
-                            @if(auth()->user()->role->name == 'admin')
-                                @if(Route::has('admin.profile'))
-                                    <a href="{{ route('admin.profile') }}" class="nav-link">
-                                        <i class="fas fa-user"></i>
-                                        <span>Profil</span>
-                                    </a>
-                                @endif
-                            @elseif(auth()->user()->role->name == 'siswa')
-                                @if(Route::has('siswa.profile'))
-                                    <a href="{{ route('siswa.profile') }}" class="nav-link">
-                                        <i class="fas fa-user"></i>
-                                        <span>Profil</span>
-                                    </a>
-                                @endif
-                            @elseif(auth()->user()->role->name == 'guru')
-                                @if(Route::has('guru.profile'))
-                                    <a href="{{ route('guru.profile') }}" class="nav-link">
-                                        <i class="fas fa-user"></i>
-                                        <span>Profil</span>
-                                    </a>
-                                @endif
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     </div>
-
+    
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom scripts -->
-    <script src="{{ asset('js/main.js') }}"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebar-collapse').addEventListener('click', function() {
+            document.getElementById('wrapper').classList.toggle('toggled');
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+        
+        // Close dropdown when clicking outside
+        $(document).click(function(e) {
+            if (!$(e.target).is('.dropdown-toggle')) {
+                $('.dropdown-menu').removeClass('show');
+            }
+        });
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    </script>
+    
     @yield('scripts')
 </body>
 </html>

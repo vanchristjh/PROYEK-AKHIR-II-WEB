@@ -3,12 +3,12 @@ use Illuminate\Support\Facades\Request;
 ?>
 
 <!-- Dashboard -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-indigo-400 rounded-full"></span>
         Dashboard
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="<?php echo e(route('guru.dashboard')); ?>" class="sidebar-item <?php echo e(Request::routeIs('guru.dashboard') ? 'sidebar-active text-white' : 'text-indigo-100 hover:text-white'); ?> flex items-center rounded-lg px-4 py-3 transition-all duration-200">
                 <i class="fas fa-tachometer-alt text-lg w-6 <?php echo e(!Request::routeIs('guru.dashboard') ? 'text-indigo-300' : ''); ?>"></i>
@@ -19,12 +19,12 @@ use Illuminate\Support\Facades\Request;
 </div>
 
 <!-- Pembelajaran -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-green-400 rounded-full"></span>
         Pembelajaran
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="<?php echo e(route('guru.materials.index')); ?>" class="sidebar-item flex items-center rounded-lg px-4 py-2.5 group relative text-indigo-100 hover:text-white transition-all duration-200 <?php echo e(request()->routeIs('guru.materials.*') ? 'sidebar-active' : ''); ?>">
                 <div class="p-1.5 rounded-lg <?php echo e(request()->routeIs('guru.materials.*') ? 'bg-green-800' : 'bg-indigo-700/50 group-hover:bg-green-700/50'); ?> transition-all duration-200">
@@ -95,12 +95,12 @@ use Illuminate\Support\Facades\Request;
 </div>
 
 <!-- Jadwal -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-blue-400 rounded-full"></span>
         Jadwal
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="<?php echo e(route('guru.schedule.index')); ?>" class="sidebar-item flex items-center rounded-lg px-4 py-2.5 group relative text-indigo-100 hover:text-white transition-all duration-200 <?php echo e(request()->routeIs('guru.schedule.*') ? 'sidebar-active' : ''); ?>">
                 <div class="p-1.5 rounded-lg <?php echo e(request()->routeIs('guru.schedule.*') ? 'bg-green-800' : 'bg-indigo-700/50 group-hover:bg-blue-700/50'); ?> transition-all duration-200">
@@ -116,18 +116,18 @@ use Illuminate\Support\Facades\Request;
 </div>
 
 <!-- Informasi -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-red-400 rounded-full"></span>
         Informasi
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="<?php echo e(route('guru.announcements.index')); ?>" class="sidebar-item <?php echo e(Request::routeIs('guru.announcements.*') ? 'sidebar-active text-white' : 'text-indigo-100 hover:text-white'); ?> flex items-center rounded-lg px-4 py-3 transition-all duration-200">
                 <i class="fas fa-bullhorn text-lg w-6 <?php echo e(!Request::routeIs('guru.announcements.*') ? 'text-indigo-300' : ''); ?>"></i>
                 <span class="ml-3">Pengumuman</span>
                 <?php if(isset($unreadImportantAnnouncements) && $unreadImportantAnnouncements > 0): ?>
-                    <span class="ml-3 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"><?php echo e($unreadImportantAnnouncements); ?></span>
+                    <span class="inline-flex items-center justify-center px-2 py-1 ml-3 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"><?php echo e($unreadImportantAnnouncements); ?></span>
                 <?php endif; ?>
             </a>
         </li>
@@ -135,30 +135,18 @@ use Illuminate\Support\Facades\Request;
 </div>
 
 <!-- Akun -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-purple-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-purple-400 rounded-full"></span>
         Akun
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
-        <li>
+    <ul class="px-3 space-y-1 sidebar-items">        <li>
             <a href="<?php echo e(route('guru.profile.show')); ?>" class="sidebar-item <?php echo e(request()->routeIs('guru.profile.*') ? 'sidebar-active text-white' : 'text-indigo-100 hover:text-white transition-all duration-200'); ?> flex items-center rounded-lg px-4 py-2.5 group">
                 <div class="p-1.5 rounded-lg <?php echo e(request()->routeIs('guru.profile.*') ? 'bg-purple-800' : 'bg-indigo-700/50 group-hover:bg-purple-700/50'); ?> transition-all duration-200">
                     <i class="fas fa-user-circle text-lg w-5 h-5 flex items-center justify-center <?php echo e(request()->routeIs('guru.profile.*') ? 'text-white' : 'text-indigo-300 group-hover:text-white'); ?>"></i>
                 </div>
                 <span class="ml-3">Profil Saya</span>
                 <?php if(request()->routeIs('guru.profile.*')): ?>
-                    <span class="absolute inset-y-0 left-0 w-1 bg-purple-400 rounded-tr-md rounded-br-md"></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li>
-            <a href="<?php echo e(route('guru.settings.index')); ?>" class="sidebar-item <?php echo e(request()->routeIs('guru.settings.*') ? 'sidebar-active text-white' : 'text-indigo-100 hover:text-white transition-all duration-200'); ?> flex items-center rounded-lg px-4 py-2.5 group">
-                <div class="p-1.5 rounded-lg <?php echo e(request()->routeIs('guru.settings.*') ? 'bg-purple-800' : 'bg-indigo-700/50 group-hover:bg-purple-700/50'); ?> transition-all duration-200">
-                    <i class="fas fa-cog text-lg w-5 h-5 flex items-center justify-center <?php echo e(request()->routeIs('guru.settings.*') ? 'text-white' : 'text-indigo-300 group-hover:text-white'); ?>"></i>
-                </div>
-                <span class="ml-3">Pengaturan Akun</span>
-                <?php if(request()->routeIs('guru.settings.*')): ?>
                     <span class="absolute inset-y-0 left-0 w-1 bg-purple-400 rounded-tr-md rounded-br-md"></span>
                 <?php endif; ?>
             </a>

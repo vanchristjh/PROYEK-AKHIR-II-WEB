@@ -68,7 +68,8 @@ class CheckPermission
                     $assignmentId = $request->route('assignment');
                     $assignment = \App\Models\Assignment::find($assignmentId);
                     
-                    if ($assignment && $assignment->classes()->where('class_id', $user->classroom_id)->exists()) {
+                    // Check if the current user's class has access to this assignment
+                    if ($assignment && $assignment->schoolClasses()->where('class_id', $user->classroom_id)->exists()) {
                         return $next($request);
                     }
                 }

@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Edit Soal Kuis')
+@section('title', 'Edit Soal')
 
-@section('header', 'Edit Soal Kuis')
+@section('header', 'Edit Soal')
 
 @section('content')
     <!-- Header Banner -->
@@ -12,20 +12,32 @@
         </div>
         <div class="relative z-10">
             <h2 class="text-2xl font-bold mb-2">Edit Soal</h2>
-            <p class="text-purple-100">Perbarui soal untuk kuis {{ $question->quiz->title }}</p>
+            <p class="text-purple-100">
+                @if($question->quiz_id)
+                    Perbarui soal untuk kuis {{ $question->quiz->title }}
+                @else
+                    Perbarui soal untuk ujian {{ $exam->title }}
+                @endif
+            </p>
         </div>
     </div>
 
     <div class="mb-6">
-        <a href="{{ route('guru.quizzes.show', $question->quiz_id) }}" class="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors">
-            <i class="fas fa-chevron-left mr-2 text-sm"></i>
-            <span>Kembali ke Detail Kuis</span>
-        </a>
+        @if($question->quiz_id)
+            <a href="{{ route('guru.quizzes.show', $question->quiz_id) }}" class="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors">
+                <i class="fas fa-chevron-left mr-2 text-sm"></i>
+                <span>Kembali ke Detail Kuis</span>
+            </a>
+        @else
+            <a href="{{ route('guru.exams.questions', $exam->id) }}" class="inline-flex items-center text-purple-600 hover:text-purple-800 transition-colors">
+                <i class="fas fa-chevron-left mr-2 text-sm"></i>
+                <span>Kembali ke Soal Ujian</span>
+            </a>
+        @endif
     </div>
     
     <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100/50 transform transition hover:shadow-md">
-        <div class="p-6">
-            <form action="{{ route('guru.questions.update', $question->id) }}" method="POST" class="animate-fade-in" id="questionForm">
+        <div class="p-6">            <form action="{{ route('guru.exams.questions.update', ['exam' => $exam->id, 'question' => $question->id]) }}" method="POST" class="animate-fade-in" id="questionForm">
                 @csrf
                 @method('PUT')
                 
@@ -62,7 +74,7 @@
 
                     <!-- Multiple Choice Options -->
                     <div id="multiple_choice_options" class="form-group mb-5 {{ old('type', $question->type) == 'multiple_choice' ? '' : 'hidden' }}">
-                        <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+                        <label class="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
                             <span>Pilihan Jawaban <span class="text-red-500">*</span></span>
                             <button type="button" id="add_option" class="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 px-2 py-1 rounded">
                                 <i class="fas fa-plus mr-1"></i> Tambah Pilihan
@@ -192,7 +204,7 @@
                 
                 <div class="border-t border-gray-200 mt-8 pt-5">
                     <div class="flex justify-end">
-                        <a href="{{ route('guru.quizzes.show', $question->quiz_id) }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300">
+                        <a href="{{ route('guru.exams.questions', $exam->id) }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300">
                             <i class="fas fa-times mr-2"></i> Batal
                         </a>
                         <button type="submit" class="ml-3 px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">

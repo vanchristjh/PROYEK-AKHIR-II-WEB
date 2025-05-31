@@ -7,11 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
+    use HasFactory;    protected $fillable = [
         'content',
-        'type',
+        'question_type',
         'points',
         'correct_answer',
         'explanation',
@@ -56,8 +54,7 @@ class Question extends Model
      * Check if this is a multiple-choice question.
      */
     public function getIsMultipleChoiceAttribute()
-    {
-        return $this->type === 'multiple_choice';
+    {        return $this->question_type === 'multiple_choice';
     }
 
     /**
@@ -65,7 +62,7 @@ class Question extends Model
      */
     public function getIsTrueFalseAttribute()
     {
-        return $this->type === 'true_false';
+        return $this->question_type === 'true_false';
     }
 
     /**
@@ -73,7 +70,7 @@ class Question extends Model
      */
     public function getIsEssayAttribute()
     {
-        return $this->type === 'essay';
+        return $this->question_type === 'essay';
     }
 
     /**
@@ -81,6 +78,6 @@ class Question extends Model
      */
     public function getIsShortAnswerAttribute()
     {
-        return $this->type === 'short_answer';
+        return $this->question_type === 'short_answer';
     }
 }

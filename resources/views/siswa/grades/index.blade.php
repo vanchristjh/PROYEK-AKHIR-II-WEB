@@ -115,16 +115,21 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($submissions ?? [] as $submission)
-                    <tr class="hover:bg-gray-50 transition-all">
+                    @forelse($submissions ?? [] as $submission)                    <tr class="hover:bg-gray-50 transition-all">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $submission->assignment->title }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $submission->assignment->title ?? 'Judul tidak tersedia' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-600">{{ $submission->assignment->subject->name }}</div>
+                            <div class="text-sm text-gray-600">
+                                @if($submission->assignment && $submission->assignment->subject)
+                                    {{ $submission->assignment->subject->name }}
+                                @else
+                                    Mata pelajaran tidak tersedia
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-600">{{ $submission->submitted_at->format('d M Y, H:i') }}</div>
+                            <div class="text-sm text-gray-600">{{ $submission->submitted_at ? $submission->submitted_at->format('d M Y, H:i') : 'Waktu tidak tersedia' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 

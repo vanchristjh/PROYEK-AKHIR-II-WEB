@@ -181,10 +181,22 @@
                                     </div>
                                     <div class="flex items-center text-sm text-gray-500 mb-2">
                                         <i class="fas fa-book-open mr-2 text-gray-400"></i>
-                                        <span>{{ $exam->subject->name }}</span>
+                                        <span>
+                                            @if($exam->subject)
+                                                {{ $exam->subject->name }}
+                                            @else
+                                                Mata pelajaran tidak tersedia
+                                            @endif
+                                        </span>
                                         <span class="mx-2 text-gray-300">|</span>
                                         <i class="fas fa-user-tie mr-2 text-gray-400"></i>
-                                        <span>{{ $exam->teacher->name }}</span>
+                                        <span>
+                                            @if($exam->teacher)
+                                                {{ $exam->teacher->name }}
+                                            @else
+                                                Guru tidak tersedia
+                                            @endif
+                                        </span>
                                     </div>
                                     <div class="flex items-center text-sm text-gray-500 mb-3">
                                         <i class="fas fa-clock mr-2 text-gray-400"></i>

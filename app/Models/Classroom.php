@@ -42,7 +42,7 @@ class Classroom extends Model
      */
     public function assignments()
     {
-        return $this->belongsToMany(Assignment::class, 'classroom_assignment', 'classroom_id', 'assignment_id');
+        return $this->belongsToMany(Assignment::class, 'assignment_classroom', 'classroom_id', 'assignment_id');
     }
 
     /**

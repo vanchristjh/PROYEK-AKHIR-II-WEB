@@ -168,9 +168,8 @@ class GuruDashboardController extends Controller
                         'id' => $submission->assignment->id,
                         'title' => $submission->assignment->title
                     ],                    'score' => $submission->score,
-                    'submitted_at' => $submission->submitted_at,
-                    'time_ago' => $submission->submitted_at ? $submission->submitted_at->diffForHumans() : 'Belum dikumpulkan',
-                    'detail_url' => route('guru.submissions.show', [$submission->assignment_id, $submission->id])
+                    'submitted_at' => $submission->submitted_at,                    'time_ago' => $submission->submitted_at ? $submission->submitted_at->diffForHumans() : 'Belum dikumpulkan',
+                    'detail_url' => route('guru.assignments.submissions.show', ['assignment' => $submission->assignment_id, 'submission' => $submission->id])
                 ];
             });
         

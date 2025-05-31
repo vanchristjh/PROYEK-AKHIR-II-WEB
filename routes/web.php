@@ -87,6 +87,10 @@ Route::get('/auth-debug', function() {
     return view('auth.debug');
 });
 
+// Database pivot table check routes
+Route::get('/check-pivot-tables', [App\Http\Controllers\DatabaseCheckController::class, 'checkPivotTables']);
+Route::get('/create-test-data', [App\Http\Controllers\DatabaseCheckController::class, 'createTestData']);
+
 // New debug routes
 Route::get('/debug/auth', [App\Http\Controllers\DebugController::class, 'checkAuth'])->name('debug.auth');
 Route::get('/debug/guru-route', [App\Http\Controllers\DebugController::class, 'tryGuruRoute'])->name('debug.guru-route');
@@ -170,9 +174,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Announcement management
     Route::resource('announcements', App\Http\Controllers\Admin\AnnouncementController::class);
-    Route::get('announcements/{announcement}/download', [App\Http\Controllers\Admin\AnnouncementController::class, 'download'])->name('announcements.download');
-    Route::get('announcements/{announcement}/export/pdf', [App\Http\Controllers\Admin\AnnouncementController::class, 'exportPdf'])->name('announcements.export.pdf');
-    Route::get('announcements/{announcement}/export/excel', [App\Http\Controllers\Admin\AnnouncementController::class, 'exportExcel'])->name('announcements.export.excel');
+    Route::get('announcements/{announcement}/download', [AppHttp\Controllers\Admin\AnnouncementController::class, 'download'])->name('announcements.download');
+    Route::get('announcements/{announcement}/export/pdf', [AppHttp\Controllers\Admin\AnnouncementController::class, 'exportPdf'])->name('announcements.export.pdf');
+    Route::get('announcements/{announcement}/export/excel', [AppHttp\Controllers\Admin\AnnouncementController::class, 'exportExcel'])->name('announcements.export.excel');
     
     // Events management
     Route::resource('events', AdminEventController::class);
@@ -267,18 +271,24 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru'])->group(f
         Route::get('/{assignment}/edit', [App\Http\Controllers\Guru\AssignmentController::class, 'edit'])->name('edit');
         Route::put('/{assignment}', [App\Http\Controllers\Guru\AssignmentController::class, 'update'])->name('update');
         Route::delete('/{assignment}', [App\Http\Controllers\Guru\AssignmentController::class, 'destroy'])->name('destroy');
+        Route::get('/{assignment}/statistics', [App\Http\Controllers\Guru\AssignmentController::class, 'statistics'])->name('statistics');
+        Route::get('/{assignment}/statistics/export', [App\Http\Controllers\Guru\AssignmentController::class, 'exportStatistics'])->name('statistics.export');
         
         // Submissions nested under assignments
         Route::prefix('{assignment}/submissions')->name('submissions.')->group(function() {
             Route::get('/', [App\Http\Controllers\Guru\SubmissionController::class, 'index'])->name('index');
-            Route::get('/{submission}', [App\Http\Controllers\Guru\SubmissionController::class, 'show'])->name('show');
-            Route::get('/{submission}/download', [App\Http\Controllers\Guru\SubmissionController::class, 'download'])->name('download');
-            Route::get('/{submission}/preview', [App\Http\Controllers\Guru\SubmissionController::class, 'preview'])->name('preview');
-            Route::put('/{submission}/grade', [App\Http\Controllers\Guru\SubmissionController::class, 'grade'])->name('grade');
+            Route::get('/{submission}', [App\Http\Controllers\Guru\SubmissionController::class, 'show'])->name('show')->whereNumber(['assignment', 'submission']);
+            Route::get('/{submission}/download', [App\Http\Controllers\Guru\SubmissionController::class, 'download'])->name('download')->whereNumber(['assignment', 'submission']);
+            Route::get('/{submission}/preview', [App\Http\Controllers\Guru\SubmissionController::class, 'preview'])->name('preview')->whereNumber(['assignment', 'submission']);
+            Route::put('/{submission}/grade', [App\Http\Controllers\Guru\SubmissionController::class, 'grade'])
+        ->name('grade')
+        ->whereNumber('submission');
+            Route::post('/update-batch', [App\Http\Controllers\Guru\SubmissionController::class, 'updateBatch'])->name('update-batch');
         });
 
         // Batch grade route
         Route::get('/{assignment}/batch-grade', [App\Http\Controllers\Guru\AssignmentController::class, 'batchGrade'])->name('batch-grade');
+        Route::post('/{assignment}/batch-grade/save', [App\Http\Controllers\Guru\AssignmentController::class, 'saveBatchGrade'])->name('batch-grade.save');
     });
     
     // Attendance management
@@ -290,9 +300,9 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru'])->group(f
     Route::resource('grades', App\Http\Controllers\Guru\GradeController::class);
     
     // AJAX routes for dependent dropdowns
-    Route::get('subjects/{subject}/classrooms', [App\Http\Controllers\Guru\GradeController::class, 'getClassroomsBySubject'])
+    Route::get('subjects/{subject}/classrooms', [App\Http\Controllers\Guru\GradeController::class, 'getTeacherClassrooms'])
         ->name('grades.getClassrooms');
-    Route::get('classrooms/{classroom}/students', [App\Http\Controllers\Guru\GradeController::class, 'getStudentsByClassroom'])
+    Route::get('classrooms/{classroom}/students', [App\Http\Controllers\Guru\GradeController::class, 'getClassroomStudents'])
         ->name('grades.getStudents');
     
     // Announcements management
@@ -324,21 +334,13 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru'])->group(f
 
     // Assignments routes
     Route::resource('assignments', GuruAssignmentController::class);
+    Route::get('subjects/{id}/classrooms', [GuruAssignmentController::class, 'getClassrooms']);
 
     // Submissions routes
     Route::post('submissions/{id}/grade', [App\Http\Controllers\Guru\SubmissionController::class, 'grade'])->name('submissions.grade.teacher.id');
     Route::get('submissions/{id}/download', [App\Http\Controllers\Guru\SubmissionController::class, 'download'])->name('submissions.download.teacher.id');
     Route::put('submissions/{submission}', [App\Http\Controllers\Guru\SubmissionController::class, 'update'])->name('submissions.update.teacher');
-    Route::post('/submissions/update-batch', [App\Http\Controllers\Guru\SubmissionController::class, 'updateBatch'])->name('submissions.update-batch');
-
-    Route::resource('schedules', GuruScheduleController::class);
-});
-
-// Teacher routes - using guru role to match the database
-Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
-    // Assignments
-    Route::resource('assignments', GuruAssignmentController::class);
-    Route::get('subjects/{id}/classrooms', [GuruAssignmentController::class, 'getClassrooms']);
+        Route::resource('schedules', GuruScheduleController::class);
     Route::post('assignments/batch-update', [GuruAssignmentController::class, 'batchUpdate'])->name('assignments.batch-update');
     Route::get('assignments/{assignment}/clone', [GuruAssignmentController::class, 'clone'])->name('assignments.clone');
     Route::get('assignments/{assignment}/data', [GuruAssignmentController::class, 'getAssignment'])->name('assignments.data');
@@ -346,11 +348,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Export Excel route
     Route::get('export-excel', [App\Http\Controllers\Guru\GuruExportController::class, 'export'])->name('export-excel');
     
-    // Submissions
-    Route::post('submissions/{id}/grade', [App\Http\Controllers\Guru\SubmissionController::class, 'grade'])->name('submissions.grade.guru');
-    Route::get('submissions/{id}/download', [App\Http\Controllers\Guru\SubmissionController::class, 'download'])->name('submissions.download.guru');
-    Route::put('submissions/{submission}', [App\Http\Controllers\Guru\SubmissionController::class, 'update'])->name('submissions.update.guru');
-    Route::post('submissions/update-batch', [App\Http\Controllers\Guru\SubmissionController::class, 'updateBatch'])->name('submissions.update-batch');
+    // Submissions handling routes
     Route::post('assignments/{assignment}/send-reminder', [App\Http\Controllers\Guru\SubmissionController::class, 'sendReminder'])->name('assignments.send-reminder');
     Route::post('assignments/{assignment}/send-bulk-reminders', [App\Http\Controllers\Guru\SubmissionController::class, 'sendBulkReminders'])->name('assignments.send-bulk-reminders');
     Route::get('assignments/{assignment}/export-submissions', [App\Http\Controllers\Guru\SubmissionController::class, 'exportSubmissions'])->name('assignments.export-submissions');
@@ -362,36 +360,14 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('/dashboard', [App\Http\Controllers\Siswa\SiswaDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/refresh', [App\Http\Controllers\Siswa\SiswaDashboardController::class, 'refresh'])->name('dashboard.refresh');
     
-    // Materials routes with proper naming and prefixing
+    // Materials routes
     Route::get('/materials', [App\Http\Controllers\Siswa\SiswaMaterialController::class, 'index'])->name('materials.index');
     Route::get('/materials/{material}', [App\Http\Controllers\Siswa\SiswaMaterialController::class, 'show'])->name('materials.show');
     
-    // Assignments for students
-    Route::get('assignments', [App\Http\Controllers\Siswa\SiswaAssignmentController::class, 'index'])->name('assignments.index');
-    Route::get('assignments/{assignment}', [App\Http\Controllers\Siswa\SiswaAssignmentController::class, 'show'])->name('assignments.show');
-    Route::post('assignments/{assignment}/submit', [App\Http\Controllers\Siswa\SiswaAssignmentController::class, 'submit'])->name('assignments.submit');
-    Route::get('/assignments', [App\Http\Controllers\Siswa\AssignmentController::class, 'index'])->name('assignments.index');
-    Route::get('/assignments/{assignment}', [App\Http\Controllers\Siswa\AssignmentController::class, 'show'])->name('assignments.show');
-    Route::post('/assignments/{assignment}/submit', [App\Http\Controllers\Siswa\AssignmentController::class, 'submit'])->name('assignments.submit');
-    
-    // Submissions for students
-    Route::get('submissions', [App\Http\Controllers\Siswa\SubmissionController::class, 'index'])->name('submissions.index');
-    Route::get('submissions/{id}', [App\Http\Controllers\Siswa\SubmissionController::class, 'show'])->name('submissions.show');
-    Route::post('submissions', [App\Http\Controllers\Siswa\SubmissionController::class, 'store'])->name('submissions.store.siswa');
-    Route::put('submissions/{id}', [App\Http\Controllers\Siswa\SubmissionController::class, 'update'])->name('submissions.update.siswa.id');
-    Route::delete('submissions/{id}', [App\Http\Controllers\Siswa\SubmissionController::class, 'destroy'])->name('submissions.destroy.siswa.id');
-    Route::get('submissions/{id}/download', [App\Http\Controllers\Siswa\SubmissionController::class, 'download'])->name('submissions.download.siswa');
-    Route::put('/submissions/{submission}', [App\Http\Controllers\Siswa\SubmissionController::class, 'update'])->name('submissions.update.siswa');
-    Route::delete('/submissions/{submission}', [App\Http\Controllers\Siswa\SubmissionController::class, 'destroy'])->name('submissions.destroy.siswa');
-    Route::get('/submissions/{submission}/download', [App\Http\Controllers\Siswa\SubmissionController::class, 'download'])->name('submissions.download.siswa.alt');
-    
-    // Removing duplicate routes as they are properly defined in the siswa route group
-    
     // Schedule for students (view only)
     Route::get('/schedule', [App\Http\Controllers\Siswa\SiswaScheduleController::class, 'index'])->name('schedule.index');
-    Route::get('/schedule/day/{day}', [App\Http\Controllers\Siswa\SiswaScheduleController::class, 'showDay'])->name('schedule.day');
+    Route::get('/schedule/day/{day}', [AppHttp\Controllers\Siswa\SiswaScheduleController::class, 'showDay'])->name('schedule.day');
     Route::get('/schedule/export/ical', [App\Http\Controllers\Siswa\SiswaScheduleController::class, 'exportIcal'])->name('schedule.export-ical');
-    Route::get('/schedule/check-conflicts', [App\Http\Controllers\Siswa\SiswaScheduleController::class, 'checkConflicts'])->name('schedule.check-conflicts');
     Route::get('/schedule/{id}', [App\Http\Controllers\Siswa\SiswaScheduleController::class, 'show'])->name('schedule.show');
     
     // Grades for students
@@ -412,16 +388,14 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('attendance/{month?}/{year?}', [App\Http\Controllers\Siswa\AttendanceController::class, 'month'])->name('attendance.month');
     Route::get('attendance/subject/{subject}', [App\Http\Controllers\Siswa\AttendanceController::class, 'bySubject'])->name('attendance.by-subject');
     
-    // Add the profile route
+    // Profile
     Route::get('/profile', [App\Http\Controllers\Siswa\SiswaProfileController::class, 'show'])->name('profile.show');
     
-    // Add settings routes
+    // Settings
     Route::get('/settings', [App\Http\Controllers\Siswa\SiswaSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [App\Http\Controllers\Siswa\SiswaSettingsController::class, 'update'])->name('settings.update');
 
-    // Routes for student material and schedule are defined elsewhere
-
-    // Add the missing 'material' route in the siswa group
+    // Material routes
     Route::resource('material', SiswaMaterialController::class);
 });
 
@@ -516,6 +490,9 @@ Route::prefix('api')->name('api.')->group(function () {
 // Admin schedule repair route
 Route::post('admin/schedule/{schedule}/refresh-relations', 'App\Http\Controllers\Admin\ScheduleController@refreshRelations')
     ->name('admin.schedule.refresh-relations');
+
+// Test diagnostic route
+Route::get('/test-assignments', [App\Http\Controllers\TestController::class, 'testAssignmentRelations']);
 
 // Error routes
 Route::fallback(function () {

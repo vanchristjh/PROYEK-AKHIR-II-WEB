@@ -130,10 +130,19 @@
                                       ($assignment->submissions->isNotEmpty() ? 'check-circle' : 'clock') }} text-xl"></i>
                                 </span>
                                 <div class="ml-3">
-                                    <h3 class="text-lg font-medium text-gray-800">{{ $assignment->title }}</h3>
-                                    <p class="text-sm text-gray-500 flex items-center">
+                                    <h3 class="text-lg font-medium text-gray-800">{{ $assignment->title }}</h3>                                    <p class="text-sm text-gray-500 flex items-center">
                                         <i class="fas fa-book text-blue-500 mr-1"></i>
-                                        {{ $assignment->subject->name }} - <i class="fas fa-user text-green-500 mx-1"></i> {{ $assignment->teacher->name }}
+                                        @if($assignment->subject)
+                                            {{ $assignment->subject->name }}
+                                        @else
+                                            Mata pelajaran tidak tersedia
+                                        @endif
+                                        - <i class="fas fa-user text-green-500 mx-1"></i> 
+                                        @if($assignment->teacher)
+                                            {{ $assignment->teacher->name }}
+                                        @else
+                                            Guru tidak tersedia
+                                        @endif
                                     </p>
                                 </div>
                             </div>

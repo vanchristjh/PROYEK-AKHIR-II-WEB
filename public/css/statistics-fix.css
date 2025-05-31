@@ -1,0 +1,56 @@
+/* Fix for statistics page display */
+body {
+  display: block !important;
+  min-height: 100vh !important;
+  background-color: #f8fafc !important;
+}
+
+#wrapper {
+  display: flex !important;
+  min-height: 100vh !important;
+  position: relative !important;
+}
+
+.sidebar {
+  display: flex !important;
+  flex-direction: column;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+#page-content-wrapper {
+  display: block !important;
+  flex: 1;
+  position: relative !important;
+  z-index: 5 !important;
+  overflow: auto !important;
+  height: auto !important;
+}
+
+.content-container {
+  padding: 1rem;
+  min-height: calc(100vh - 70px) !important; 
+  position: relative !important;
+  display: block !important;
+}
+
+/* Make sure text is visible */
+h1, h2, h3, p, span, div {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Force display for chart elements */
+canvas {
+  display: block !important;
+  max-width: 100% !important;
+}
+
+/* Debug outlines */
+.container {
+  border: 1px dashed rgba(0, 0, 255, 0.2);
+}
+
+.bg-white {
+  background-color: white !important;
+}

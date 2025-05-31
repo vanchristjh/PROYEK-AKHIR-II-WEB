@@ -6,38 +6,38 @@
 
 @section('content')
     <!-- Header Banner -->
-    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-xl p-6 mb-6 text-white relative overflow-hidden">
+    <div class="relative p-6 mb-6 overflow-hidden text-white shadow-xl bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
         <div class="absolute -right-10 -top-10 opacity-10">
             <i class="fas fa-chart-bar text-9xl"></i>
         </div>
-        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
+        <div class="absolute w-64 h-64 rounded-full -left-20 -bottom-20 bg-white/10 blur-2xl"></div>
         <div class="relative z-10">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div class="mb-4 md:mb-0">
                     <div class="flex items-center mb-2">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200 mr-2">
-                            <i class="fas fa-book mr-1"></i> {{ $quiz->subject->name ?? 'Tidak ada mata pelajaran' }}
+                        <span class="inline-flex items-center px-3 py-1 mr-2 text-xs font-semibold text-blue-800 bg-blue-100 border border-blue-200 rounded-full">
+                            <i class="mr-1 fas fa-book"></i> {{ $quiz->subject->name ?? 'Tidak ada mata pelajaran' }}
                         </span>
                         @if($quiz->is_active)
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 border border-green-200 rounded-full">
                                 <div class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></div>
                                 Aktif
                             </span>
                         @endif
                     </div>
                     <h2 class="text-2xl font-bold">Hasil Kuis: {{ $quiz->title }}</h2>
-                    <p class="text-blue-100 mt-1">
-                        <i class="fas fa-calendar-alt mr-1"></i> 
+                    <p class="mt-1 text-blue-100">
+                        <i class="mr-1 fas fa-calendar-alt"></i> 
                         {{ $quiz->start_time ? \Carbon\Carbon::parse($quiz->start_time)->format('d M Y, H:i') : 'Tidak diatur' }} - 
                         {{ $quiz->end_time ? \Carbon\Carbon::parse($quiz->end_time)->format('d M Y, H:i') : 'Tidak diatur' }}
                     </p>
                 </div>
                 <div class="flex space-x-2">
-                    <a href="{{ route('guru.quizzes.show', $quiz->id) }}" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors backdrop-blur-sm">
-                        <i class="fas fa-eye mr-2"></i> Detail Kuis
+                    <a href="{{ route('guru.quizzes.show', $quiz->id) }}" class="flex items-center px-4 py-2 transition-colors rounded-lg shadow-sm bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                        <i class="mr-2 fas fa-eye"></i> Detail Kuis
                     </a>
-                    <a href="{{ route('guru.quizzes.index') }}" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors backdrop-blur-sm">
-                        <i class="fas fa-list mr-2"></i> Daftar Kuis
+                    <a href="{{ route('guru.quizzes.index') }}" class="flex items-center px-4 py-2 transition-colors rounded-lg shadow-sm bg-white/10 hover:bg-white/20 backdrop-blur-sm">
+                        <i class="mr-2 fas fa-list"></i> Daftar Kuis
                     </a>
                 </div>
             </div>
@@ -45,12 +45,12 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Total Attempts -->
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="p-4 bg-white border border-gray-100 shadow-sm rounded-xl">
             <div class="flex items-center">
-                <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
-                    <i class="fas fa-users text-xl"></i>
+                <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 text-blue-600 bg-blue-100 rounded-lg">
+                    <i class="text-xl fas fa-users"></i>
                 </div>
                 <div>
                     <div class="text-sm text-gray-500">Total Mengerjakan</div>
@@ -61,10 +61,10 @@
         </div>
         
         <!-- Average Score -->
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="p-4 bg-white border border-gray-100 shadow-sm rounded-xl">
             <div class="flex items-center">
-                <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600 mr-3">
-                    <i class="fas fa-chart-line text-xl"></i>
+                <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 text-green-600 bg-green-100 rounded-lg">
+                    <i class="text-xl fas fa-chart-line"></i>
                 </div>
                 <div>
                     <div class="text-sm text-gray-500">Nilai Rata-rata</div>
@@ -75,10 +75,10 @@
         </div>
         
         <!-- Pass Rate -->
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="p-4 bg-white border border-gray-100 shadow-sm rounded-xl">
             <div class="flex items-center">
-                <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600 mr-3">
-                    <i class="fas fa-check-circle text-xl"></i>
+                <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 text-green-600 bg-green-100 rounded-lg">
+                    <i class="text-xl fas fa-check-circle"></i>
                 </div>
                 <div>
                     <div class="text-sm text-gray-500">Tingkat Kelulusan</div>
@@ -89,10 +89,10 @@
         </div>
         
         <!-- Highest Score -->
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="p-4 bg-white border border-gray-100 shadow-sm rounded-xl">
             <div class="flex items-center">
-                <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 mr-3">
-                    <i class="fas fa-trophy text-xl"></i>
+                <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 rounded-lg bg-amber-100 text-amber-600">
+                    <i class="text-xl fas fa-trophy"></i>
                 </div>
                 <div>
                     <div class="text-sm text-gray-500">Nilai Tertinggi</div>
@@ -104,45 +104,45 @@
     </div>
 
     <!-- Score Distribution -->
-    <div class="bg-white rounded-xl shadow-sm mb-6 overflow-hidden border border-gray-100/60">
+    <div class="mb-6 overflow-hidden bg-white border shadow-sm rounded-xl border-gray-100/60">
         <div class="p-6 border-b border-gray-100">
-            <h3 class="text-lg font-medium text-gray-800 flex items-center">
-                <div class="p-2 bg-indigo-100 rounded-lg mr-3">
-                    <i class="fas fa-chart-bar text-indigo-600"></i>
+            <h3 class="flex items-center text-lg font-medium text-gray-800">
+                <div class="p-2 mr-3 bg-indigo-100 rounded-lg">
+                    <i class="text-indigo-600 fas fa-chart-bar"></i>
                 </div>
                 <span>Distribusi Nilai</span>
             </h3>
         </div>
         <div class="p-6">
             <div class="mb-6">
-                <div class="bg-gray-50 rounded-lg p-6">
+                <div class="p-6 rounded-lg bg-gray-50">
                     <canvas id="scoreDistributionChart" height="300"></canvas>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 text-center">
-                <div class="bg-red-50 rounded-lg p-3 border border-red-100">
-                    <div class="text-xs text-gray-500 mb-1">0-20</div>
+            <div class="grid grid-cols-1 gap-4 mb-6 text-center md:grid-cols-5">
+                <div class="p-3 border border-red-100 rounded-lg bg-red-50">
+                    <div class="mb-1 text-xs text-gray-500">0-20</div>
                     <div class="text-lg font-bold text-red-600">{{ $scoreDistribution[0] ?? 0 }}</div>
                     <div class="text-xs text-red-600">Sangat Kurang</div>
                 </div>
-                <div class="bg-orange-50 rounded-lg p-3 border border-orange-100">
-                    <div class="text-xs text-gray-500 mb-1">21-40</div>
+                <div class="p-3 border border-orange-100 rounded-lg bg-orange-50">
+                    <div class="mb-1 text-xs text-gray-500">21-40</div>
                     <div class="text-lg font-bold text-orange-600">{{ $scoreDistribution[1] ?? 0 }}</div>
                     <div class="text-xs text-orange-600">Kurang</div>
                 </div>
-                <div class="bg-yellow-50 rounded-lg p-3 border border-yellow-100">
-                    <div class="text-xs text-gray-500 mb-1">41-60</div>
+                <div class="p-3 border border-yellow-100 rounded-lg bg-yellow-50">
+                    <div class="mb-1 text-xs text-gray-500">41-60</div>
                     <div class="text-lg font-bold text-yellow-600">{{ $scoreDistribution[2] ?? 0 }}</div>
                     <div class="text-xs text-yellow-600">Cukup</div>
                 </div>
-                <div class="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                    <div class="text-xs text-gray-500 mb-1">61-80</div>
+                <div class="p-3 border border-blue-100 rounded-lg bg-blue-50">
+                    <div class="mb-1 text-xs text-gray-500">61-80</div>
                     <div class="text-lg font-bold text-blue-600">{{ $scoreDistribution[3] ?? 0 }}</div>
                     <div class="text-xs text-blue-600">Baik</div>
                 </div>
-                <div class="bg-green-50 rounded-lg p-3 border border-green-100">
-                    <div class="text-xs text-gray-500 mb-1">81-100</div>
+                <div class="p-3 border border-green-100 rounded-lg bg-green-50">
+                    <div class="mb-1 text-xs text-gray-500">81-100</div>
                     <div class="text-lg font-bold text-green-600">{{ $scoreDistribution[4] ?? 0 }}</div>
                     <div class="text-xs text-green-600">Sangat Baik</div>
                 </div>
@@ -151,52 +151,52 @@
     </div>
 
     <!-- Search and Filter Section -->
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100">
-        <form action="{{ route('guru.quizzes.results', $quiz->id) }}" method="GET" class="flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="p-4 mb-6 bg-white border border-gray-100 shadow-sm rounded-xl">
+        <form action="{{ route('guru.quizzes.results', $quiz->id) }}" method="GET" class="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div class="flex-1">
                 <div class="relative rounded-md">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="text-gray-400 fas fa-search"></i>
                     </div>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa..." 
-                           class="block w-full pl-10 sm:text-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           class="block w-full pl-10 border-gray-300 rounded-lg sm:text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <select name="status" class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                <select name="status" class="border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                     <option value="">Semua Status</option>
                     <option value="passed" {{ request('status') == 'passed' ? 'selected' : '' }}>Lulus</option>
                     <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Tidak Lulus</option>
                 </select>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    <i class="fas fa-filter mr-2"></i> Filter
+                <button type="submit" class="px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
+                    <i class="mr-2 fas fa-filter"></i> Filter
                 </button>
             </div>
         </form>
     </div>
 
     <!-- Results Table -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100">
+    <div class="mb-6 overflow-hidden bg-white border border-gray-100 shadow-sm rounded-xl">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                             Siswa
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                             Kelas
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                             Nilai
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                             Status
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                             Waktu Pengerjaan
                         </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">
                             Aksi
                         </th>
                     </tr>
@@ -206,7 +206,7 @@
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                    <div class="flex items-center justify-center w-10 h-10 text-gray-500 bg-gray-200 rounded-full">
                                         {{ strtoupper(substr($attempt->student->name ?? 'U', 0, 1)) }}
                                     </div>
                                     <div class="ml-3">
@@ -240,8 +240,8 @@
                                 <div class="text-xs text-gray-500">{{ $attempt->created_at ? $attempt->created_at->format('H:i') : '-' }}</div>
                                 <div class="text-xs text-gray-500">Durasi: {{ $attempt->duration_minutes ?? '-' }} menit</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('guru.quiz-attempts.show', $attempt->id) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">
+                            <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                <a href="{{ route('guru.quiz-attempts.show', $attempt->id) }}" class="px-2 py-1 text-blue-600 rounded hover:text-blue-900 bg-blue-50 hover:bg-blue-100">
                                     <i class="fas fa-eye"></i> Detail
                                 </a>
                             </td>
@@ -250,11 +250,11 @@
                         <tr>
                             <td colspan="6" class="px-6 py-10 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <div class="flex-shrink-0 h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
-                                        <i class="fas fa-users-slash text-2xl"></i>
+                                    <div class="flex items-center justify-center flex-shrink-0 w-16 h-16 mb-4 text-gray-400 bg-gray-100 rounded-full">
+                                        <i class="text-2xl fas fa-users-slash"></i>
                                     </div>
-                                    <p class="text-gray-500 font-medium">Belum ada yang mengerjakan kuis</p>
-                                    <p class="text-gray-400 text-sm mt-1">Siswa belum mengerjakan kuis ini.</p>
+                                    <p class="font-medium text-gray-500">Belum ada yang mengerjakan kuis</p>
+                                    <p class="mt-1 text-sm text-gray-400">Siswa belum mengerjakan kuis ini.</p>
                                 </div>
                             </td>
                         </tr>
@@ -264,13 +264,12 @@
         </div>
     </div>
 
-    <!-- Export Buttons -->
-    <div class="flex justify-end mb-8">
-        <a href="{{ route('guru.quizzes.export', ['quiz_id' => $quiz->id, 'format' => 'pdf']) }}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg ml-2 transition-colors">
-            <i class="fas fa-file-pdf mr-2"></i> Export PDF
+    <!-- Export Buttons -->    <div class="flex justify-end mb-8">
+        <a href="{{ route('guru.quizzes.export', ['quiz' => $quiz->id, 'format' => 'pdf']) }}" class="inline-flex items-center px-4 py-2 ml-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700">
+            <i class="mr-2 fas fa-file-pdf"></i> Export PDF
         </a>
-        <a href="{{ route('guru.quizzes.export', ['quiz_id' => $quiz->id, 'format' => 'excel']) }}" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg ml-2 transition-colors">
-            <i class="fas fa-file-excel mr-2"></i> Export Excel
+        <a href="{{ route('guru.quizzes.export', ['quiz' => $quiz->id, 'format' => 'excel']) }}" class="inline-flex items-center px-4 py-2 ml-2 text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700">
+            <i class="mr-2 fas fa-file-excel"></i> Export Excel
         </a>
     </div>
 

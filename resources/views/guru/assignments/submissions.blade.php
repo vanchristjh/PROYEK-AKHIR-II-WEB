@@ -157,10 +157,10 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     @if($student['has_submitted'])
-                                        <a href="{{ route('guru.submissions.show', $student['submission']) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                        <a href="{{ route('guru.assignments.submissions.show', ['assignment' => $assignment->id, 'submission' => $student['submission']]) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                             <i class="fas fa-eye"></i> Lihat
                                         </a>
-                                        <a href="{{ route('guru.submissions.grade', $student['submission']) }}" class="text-green-600 hover:text-green-900">
+                                        <a href="{{ route('guru.assignments.submissions.grade', ['assignment' => $assignment->id, 'submission' => $student['submission']]) }}" class="text-green-600 hover:text-green-900">
                                             <i class="fas fa-star"></i> Nilai
                                         </a>
                                     @else

@@ -711,9 +711,14 @@
                             />
                         </svg>
                         {{ $score }}
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ $scoreText }}</h3>
-                    <p class="text-gray-500 mb-4">Kuis diselesaikan pada {{ $attempt->submitted_at->format('d M Y, H:i') }}</p>
+                    </div>                    <h3 class="text-xl font-semibold mb-2">{{ $scoreText }}</h3>
+                    <p class="text-gray-500 mb-4">Kuis diselesaikan pada 
+                        @if($attempt->submitted_at)
+                            {{ $attempt->submitted_at->format('d M Y, H:i') }}
+                        @else
+                            waktu tidak tersedia
+                        @endif
+                    </p>
                     
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div class="stat-box bg-green-50 rounded-lg">
@@ -823,15 +828,26 @@
                     <span class="text-gray-500">Jumlah Soal</span>
                     <span class="font-medium">{{ count($results) }}</span>
                 </div>
-                
-                <div class="summary-item">
+                  <div class="summary-item">
                     <span class="text-gray-500">Waktu Mulai</span>
-                    <span class="font-medium">{{ $attempt->created_at->format('d M Y, H:i') }}</span>
+                    <span class="font-medium">
+                        @if($attempt->created_at)
+                            {{ $attempt->created_at->format('d M Y, H:i') }}
+                        @else
+                            Waktu tidak tersedia
+                        @endif
+                    </span>
                 </div>
                 
                 <div class="summary-item">
                     <span class="text-gray-500">Waktu Selesai</span>
-                    <span class="font-medium">{{ $attempt->submitted_at->format('d M Y, H:i') }}</span>
+                    <span class="font-medium">
+                        @if($attempt->submitted_at)
+                            {{ $attempt->submitted_at->format('d M Y, H:i') }}
+                        @else
+                            Waktu tidak tersedia
+                        @endif
+                    </span>
                 </div>
                 
                 <div class="summary-item">

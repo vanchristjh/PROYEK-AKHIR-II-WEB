@@ -8,9 +8,12 @@ use App\Models\Subject;
 use App\Models\Classroom;
 use App\Models\QuizAttempt;
 use App\Models\StudentAnswer;
+use App\Exports\QuizResultsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class QuizController extends Controller
 {
@@ -314,6 +317,28 @@ class QuizController extends Controller
     {
         if ($quiz->teacher_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke kuis ini.');
+        }
+    }    /**
+     * Export quiz results to Excel or PDF.
+     */
+    public function export(Quiz $quiz, Request $request)
+    {
+        $format = $request->format ?? 'excel';
+        $quiz->load(['attempts' => function($query) {
+            $query->with(['student', 'answers']);
+        }]);
+        
+        $baseFilename = Str::slug($quiz->title) . '-hasil';
+        
+        if ($format === 'pdf') {
+            $filename = $baseFilename . '.pdf';
+            $view = view('exports.quiz_results_pdf', compact('quiz'))->render();
+            $pdf = app()->make('dompdf.wrapper');
+            $pdf->loadHTML($view);
+            return $pdf->download($filename);
+        } else {
+            $filename = $baseFilename . '.xlsx';
+            return Excel::download(new QuizResultsExport($quiz), $filename);
         }
     }
 }

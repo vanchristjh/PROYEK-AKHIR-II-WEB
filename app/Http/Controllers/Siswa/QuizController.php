@@ -27,13 +27,13 @@ class QuizController extends Controller
             $query->whereIn('classroom_id', $classroomIds);
         })
         ->where(function($query) {
-            $query->where('start_date', '<=', now())
+            $query->where('start_time', '<=', now())
                   ->where(function($q) {
-                      $q->whereNull('end_date')
-                        ->orWhere('end_date', '>=', now());
+                      $q->whereNull('end_time')
+                        ->orWhere('end_time', '>=', now());
                   });
         })
-        ->orderBy('due_date')
+        ->orderBy('start_time')
         ->paginate(10);
         
         return view('siswa.quizzes.index', compact('quizzes'));

@@ -151,16 +151,25 @@
                                 </span>
                             </div>
                             <div class="ml-4 flex-1">
-                                <div class="flex flex-wrap justify-between mb-1">
-                                    <h4 class="text-base font-medium text-gray-800 mb-1">{{ $assignment->title }}</h4>
-                                    <span class="text-sm {{ $assignment->isExpired() ? 'text-red-600 font-medium' : 
+                                <div class="flex flex-wrap justify-between mb-1">                                    <h4 class="text-base font-medium text-gray-800 mb-1">{{ $assignment->title ?? 'Tugas' }}</h4>
+                                    @if($assignment->deadline)
+                                        <span class="text-sm {{ $assignment->isExpired() ? 'text-red-600 font-medium' : 
                                                           ($assignment->deadline->diffInDays(now()) <= 3 ? 'text-yellow-600 font-medium' : 'text-gray-500') }}">
-                                        {{ $assignment->isExpired() ? 'Deadline telah lewat' : 'Deadline: ' . $assignment->deadline->format('d M Y, H:i') }}
-                                    </span>
+                                            {{ $assignment->isExpired() ? 'Deadline telah lewat' : 'Deadline: ' . $assignment->deadline->format('d M Y, H:i') }}
+                                        </span>
+                                    @else
+                                        <span class="text-sm text-gray-500">Tidak ada tenggat waktu</span>
+                                    @endif
                                 </div>
                                 <div class="flex items-center text-sm text-gray-500 mb-2">
                                     <i class="fas fa-book-open mr-2 text-gray-400"></i>
-                                    <span>{{ $assignment->subject->name }}</span>
+                                    <span>
+                                        @if($assignment->subject)
+                                            {{ $assignment->subject->name }}
+                                        @else
+                                            Mata pelajaran tidak tersedia
+                                        @endif
+                                    </span>
                                 </div>
                                 <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ $assignment->description }}</p>
                                 <div class="flex justify-between items-center">

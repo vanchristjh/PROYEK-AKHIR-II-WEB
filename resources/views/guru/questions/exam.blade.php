@@ -38,7 +38,7 @@
 
     <div class="flex justify-between items-center mb-6">
         <div>
-            <a href="{{ route('guru.exams.create-question', $exam->id) }}" 
+            <a href="{{ route('guru.exams.questions.create', $exam->id) }}" 
                class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <i class="fas fa-plus mr-2"></i> Tambah Soal Baru
             </a>
@@ -50,7 +50,7 @@
     </div>
 
     @if($exam->questions->count() > 0)
-        <div class="w-full overflow-hidden rounded-lg shadow-md">
+        <div class="w-full overflow-hidden bg-white rounded-lg shadow-md">
             <div class="w-full overflow-x-auto">
                 <table class="w-full whitespace-no-wrap">
                     <thead>
@@ -62,7 +62,7 @@
                             <th class="px-4 py-3">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y">
+                    <tbody class="divide-y">
                         @foreach($exam->questions as $index => $question)
                             <tr class="text-gray-700">
                                 <td class="px-4 py-3 text-sm">{{ $index + 1 }}</td>
@@ -96,23 +96,22 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm">
-                                    {{ $question->points }}
+                                    <span class="font-medium">{{ $question->points }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-sm">
                                     <div class="flex items-center space-x-2">
-                                        <a href="{{ route('guru.exams.edit-question', ['exam' => $exam->id, 'question' => $question->id]) }}" 
-                                           class="px-2 py-1 text-xs font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600">
-                                            <i class="fas fa-edit"></i> Edit
+                                        <a href="{{ route('guru.exams.questions.edit', ['exam' => $exam->id, 'question' => $question->id]) }}" 
+                                           class="text-yellow-600 hover:text-yellow-900">
+                                            <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('guru.questions.destroy', $question->id) }}" method="POST" 
-                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus soal ini?')">
+                                          <form action="{{ route('guru.questions.destroy', $question->id) }}" 
+                                              method="POST" 
+                                              class="inline-block" 
+                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus soal ini?');">
                                             @csrf
                                             @method('DELETE')
-                                            <input type="hidden" name="redirect_route" value="guru.exams.questions">
-                                            <input type="hidden" name="exam_id" value="{{ $exam->id }}">
-                                            <button type="submit" 
-                                                    class="px-2 py-1 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600">
-                                                <i class="fas fa-trash"></i> Hapus
+                                            <button type="submit" class="text-red-600 hover:text-red-900">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -124,17 +123,16 @@
             </div>
         </div>
     @else
-        <div class="bg-white rounded-lg shadow-md p-6 text-center">
-            <div class="mb-4">
-                <i class="fas fa-question-circle text-gray-400 text-5xl"></i>
+        <div class="flex flex-col items-center justify-center py-12 bg-white rounded-lg shadow-sm">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-question-circle text-gray-400 text-xl"></i>
             </div>
-            <h3 class="text-xl font-medium text-gray-700 mb-2">Belum Ada Soal</h3>
-            <p class="text-gray-600 mb-4">
-                Ujian ini belum memiliki soal. Tambahkan soal agar siswa dapat mengerjakan ujian ini.
-            </p>
-            <a href="{{ route('guru.exams.create-question', $exam->id) }}" 
-               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                <i class="fas fa-plus mr-2"></i> Tambah Soal Sekarang
+            <h3 class="mb-2 text-lg font-medium text-gray-900">Belum Ada Soal</h3>
+            <p class="text-gray-500 text-center mb-4">Ujian ini belum memiliki soal. Tambahkan soal baru untuk memulai.</p>
+            <a href="{{ route('guru.exams.questions.create', $exam->id) }}" 
+               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-plus mr-2"></i>
+                Tambah Soal Pertama
             </a>
         </div>
     @endif

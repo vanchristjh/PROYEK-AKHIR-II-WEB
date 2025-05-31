@@ -2,7 +2,22 @@
 
 @section('title', $assignment->title)
 
-@section('header', 'Detail Tugas')
+@section('heade                    <span class="flex items-center">
+                        <i class="fas fa-book text-blue-500 mr-1"></i>
+                        @if($assignment->subject)
+                            {{ $assignment->subject->name }}
+                        @else
+                            Mata pelajaran tidak tersedia
+                        @endif
+                    </span>
+                    <span class="flex items-center">
+                        <i class="fas fa-user text-green-500 mr-1"></i>
+                        @if($assignment->teacher)
+                            {{ $assignment->teacher->name }}
+                        @else
+                            Guru tidak tersedia
+                        @endif
+                    </span>ail Tugas')
 
 @section('navigation')
     <li>
@@ -289,9 +304,14 @@
                         <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
                             <span class="text-xl font-bold text-green-600">{{ $submission->score }}</span>
                         </div>
-                        <div>
-                            <p class="text-gray-900 font-medium">Nilai: {{ $submission->score }}/100</p>
-                            <p class="text-sm text-gray-500">Dinilai oleh: {{ $assignment->teacher->name }}</p>
+                        <div>                            <p class="text-gray-900 font-medium">Nilai: {{ $submission->score }}/100</p>
+                            <p class="text-sm text-gray-500">Dinilai oleh: 
+                                @if($assignment->teacher)
+                                    {{ $assignment->teacher->name }}
+                                @else
+                                    Admin
+                                @endif
+                            </p>
                         </div>
                     </div>
                 </div>

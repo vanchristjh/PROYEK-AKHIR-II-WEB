@@ -5,27 +5,27 @@
 <?php $__env->startSection('header', 'Dashboard Guru'); ?>
 
 <?php $__env->startSection('content'); ?>    <!-- Welcome Banner with enhanced gradient and floating shapes -->
-    <div class="bg-gradient-to-r from-green-500 via-teal-500 to-emerald-500 animate-gradient-x rounded-xl shadow-xl p-6 mb-6 text-white relative overflow-hidden">
-        <div class="particles-container absolute inset-0 pointer-events-none"></div>
-        <div class="absolute right-0 top-0 opacity-10 transform hover:scale-110 transition-transform duration-700">
-            <i class="fas fa-chalkboard-teacher text-9xl -mt-4 -mr-4"></i>
+    <div class="relative p-6 mb-6 overflow-hidden text-white shadow-xl bg-gradient-to-r from-green-500 via-teal-500 to-emerald-500 animate-gradient-x rounded-xl">
+        <div class="absolute inset-0 pointer-events-none particles-container"></div>
+        <div class="absolute top-0 right-0 transition-transform duration-700 transform opacity-10 hover:scale-110">
+            <i class="-mt-4 -mr-4 fas fa-chalkboard-teacher text-9xl"></i>
         </div>
-        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-        <div class="absolute right-1/3 -top-12 w-36 h-36 bg-green-300/20 rounded-full blur-3xl"></div>
-        <div class="relative animate-fade-in z-10">
+        <div class="absolute w-64 h-64 rounded-full -left-20 -bottom-20 bg-white/10 blur-2xl"></div>
+        <div class="absolute rounded-full right-1/3 -top-12 w-36 h-36 bg-green-300/20 blur-3xl"></div>
+        <div class="relative z-10 animate-fade-in">
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold mb-2">Selamat datang, <?php echo e(auth()->user()->name); ?>!</h2>
-                <div class="hidden md:block text-white text-sm">
+                <h2 class="mb-2 text-2xl font-bold">Selamat datang, <?php echo e(auth()->user()->name); ?>!</h2>
+                <div class="hidden text-sm text-white md:block">
                     <span class="font-medium"><?php echo e(now()->locale('id')->isoFormat('dddd, D MMMM Y')); ?></span>
                 </div>
             </div>
             <p class="text-green-100">Anda dapat mengelola kelas, tugas, dan evaluasi siswa dari dashboard ini.</p>
-            <div class="mt-4 flex flex-wrap gap-3">
-                <a href="#quick-actions" class="btn-glass flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                    <i class="fas fa-bolt mr-2"></i> Aksi Cepat
+            <div class="flex flex-wrap gap-3 mt-4">
+                <a href="#quick-actions" class="flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg btn-glass hover:-translate-y-1 hover:shadow-lg">
+                    <i class="mr-2 fas fa-bolt"></i> Aksi Cepat
                 </a>
-                <a href="<?php echo e(route('guru.assignments.index')); ?>" class="bg-green-700/80 text-white hover:bg-green-800 px-4 py-2 rounded-lg inline-flex items-center text-sm font-medium transition-all duration-300 shadow-md shadow-green-900/30 backdrop-blur-sm hover:shadow-xl hover:-translate-y-1">
-                    <i class="fas fa-tasks mr-2"></i> Lihat Tugas
+                <a href="<?php echo e(route('guru.assignments.index')); ?>" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-all duration-300 rounded-lg shadow-md bg-green-700/80 hover:bg-green-800 shadow-green-900/30 backdrop-blur-sm hover:shadow-xl hover:-translate-y-1">
+                    <i class="mr-2 fas fa-tasks"></i> Lihat Tugas
                 </a>
             </div>
         </div>
@@ -33,54 +33,54 @@
     
     <!-- Announcements/Reminders Banner -->
     <?php if(isset($pendingGradingCount) && $pendingGradingCount > 0): ?>
-    <div class="mb-6 bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4 relative overflow-hidden animate-fade-in">
+    <div class="relative p-4 mb-6 overflow-hidden border bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 rounded-xl animate-fade-in">
         <div class="flex items-start space-x-4">
-            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-amber-400/20 flex items-center justify-center text-amber-600">
+            <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-full bg-amber-400/20 text-amber-600">
                 <i class="fas fa-bell"></i>
             </div>
             <div class="flex-1">
                 <div class="flex justify-between">
                     <h3 class="text-sm font-medium text-amber-800">Pengingat Penilaian</h3>
-                    <button class="text-amber-500 hover:text-amber-700 text-xs">
+                    <button class="text-xs text-amber-500 hover:text-amber-700">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <p class="text-sm text-amber-700 mt-1">
-                    <i class="fas fa-exclamation-circle mr-1"></i>
+                <p class="mt-1 text-sm text-amber-700">
+                    <i class="mr-1 fas fa-exclamation-circle"></i>
                     Anda memiliki <span class="font-semibold"><?php echo e($pendingGradingCount); ?></span> tugas siswa yang menunggu untuk dinilai.
-                    <a href="<?php echo e(route('guru.grades.index')); ?>" class="font-medium underline hover:text-amber-800 transition-colors">Nilai sekarang</a>
+                    <a href="<?php echo e(route('guru.grades.index')); ?>" class="font-medium underline transition-colors hover:text-amber-800">Nilai sekarang</a>
                 </p>
             </div>
         </div>
-        <div class="absolute -right-6 -bottom-8 w-24 h-24 bg-amber-300/10 rounded-full transform rotate-45 blur-2xl"></div>
+        <div class="absolute w-24 h-24 transform rotate-45 rounded-full -right-6 -bottom-8 bg-amber-300/10 blur-2xl"></div>
     </div>
     <?php endif; ?>
       <!-- Stats Cards with enhanced styling -->
-    <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
-        <div class="p-2 bg-green-100 rounded-lg mr-3">
-            <i class="fas fa-chart-pie text-green-600"></i>
+    <h3 class="flex items-center mb-4 text-lg font-medium text-gray-800">
+        <div class="p-2 mr-3 bg-green-100 rounded-lg">
+            <i class="text-green-600 fas fa-chart-pie"></i>
         </div>
         <span>Statistik Pembelajaran</span>
-        <div class="ml-auto text-sm text-gray-500 flex items-center bg-white py-1 px-3 rounded-lg shadow-sm">
-            <i class="fas fa-sync-alt mr-1 hover:rotate-180 transition-transform cursor-pointer" id="refresh-data-btn" title="Refresh data"></i>
+        <div class="flex items-center px-3 py-1 ml-auto text-sm text-gray-500 bg-white rounded-lg shadow-sm">
+            <i class="mr-1 transition-transform cursor-pointer fas fa-sync-alt hover:rotate-180" id="refresh-data-btn" title="Refresh data"></i>
             <span>Terakhir diperbarui: <?php echo e(now()->format('H:i')); ?></span>
         </div>
     </h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
+    <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 xl:grid-cols-5">
         <!-- Classes Card -->
-        <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 transform transition-all hover:scale-105 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 w-20 h-20 bg-green-50 rounded-full -mr-10 -mb-10"></div>
-            <div class="flex items-start relative">
-                <div class="p-3 rounded-lg bg-green-100 text-green-600 shadow-inner">
-                    <i class="fas fa-chalkboard text-xl"></i>
+        <div class="relative p-6 overflow-hidden transition-all transform bg-white shadow-sm dashboard-card rounded-xl hover:scale-105">
+            <div class="absolute bottom-0 right-0 w-20 h-20 -mb-10 -mr-10 rounded-full bg-green-50"></div>
+            <div class="relative flex items-start">
+                <div class="p-3 text-green-600 bg-green-100 rounded-lg shadow-inner">
+                    <i class="text-xl fas fa-chalkboard"></i>
                 </div>
-                <div class="ml-4 flex-1">
+                <div class="flex-1 ml-4">
                     <h3 class="text-sm font-medium text-gray-500">Mata Pelajaran</h3>
                     <p class="card-number floating-element" data-type="subjects"><?php echo e($subjects); ?></p>
                     <div class="mt-2">
-                        <a href="<?php echo e(route('guru.materials.index')); ?>" class="text-sm text-green-600 hover:text-green-800 inline-flex items-center group">
+                        <a href="<?php echo e(route('guru.materials.index')); ?>" class="inline-flex items-center text-sm text-green-600 hover:text-green-800 group">
                             <span>Lihat materi</span>
-                            <i class="fas fa-arrow-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                            <i class="ml-1 text-xs transition-transform fas fa-arrow-right group-hover:translate-x-1"></i>
                         </a>
                     </div>
                 </div>
@@ -88,18 +88,18 @@
         </div>
         
         <!-- Students Card -->
-        <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 transform transition-all hover:scale-105 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 w-20 h-20 bg-blue-50 rounded-full -mr-10 -mb-10"></div>
-            <div class="flex items-start relative">
-                <div class="p-3 rounded-lg bg-blue-100 text-blue-600 shadow-inner">
-                    <i class="fas fa-user-graduate text-xl"></i>
-                </div>                <div class="ml-4 flex-1">
+        <div class="relative p-6 overflow-hidden transition-all transform bg-white shadow-sm dashboard-card rounded-xl hover:scale-105">
+            <div class="absolute bottom-0 right-0 w-20 h-20 -mb-10 -mr-10 rounded-full bg-blue-50"></div>
+            <div class="relative flex items-start">
+                <div class="p-3 text-blue-600 bg-blue-100 rounded-lg shadow-inner">
+                    <i class="text-xl fas fa-user-graduate"></i>
+                </div>                <div class="flex-1 ml-4">
                     <h3 class="text-sm font-medium text-gray-500">Total Siswa</h3>
                     <p class="card-number floating-element" data-type="students"><?php echo e($studentsCount); ?></p>
                     <div class="mt-2">
-                        <a href="<?php echo e(route('guru.attendance.index')); ?>" class="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center group">
+                        <a href="<?php echo e(route('guru.attendance.index')); ?>" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 group">
                             <span>Kelola kehadiran</span>
-                            <i class="fas fa-arrow-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                            <i class="ml-1 text-xs transition-transform fas fa-arrow-right group-hover:translate-x-1"></i>
                         </a>
                     </div>
                 </div>
@@ -107,19 +107,19 @@
         </div>
         
         <!-- Assignments Card -->
-        <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 transform transition-all hover:scale-105 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 w-20 h-20 bg-purple-50 rounded-full -mr-10 -mb-10"></div>
-            <div class="flex items-start relative">
-                <div class="p-3 rounded-lg bg-purple-100 text-purple-600 shadow-inner">
-                    <i class="fas fa-tasks text-xl"></i>
+        <div class="relative p-6 overflow-hidden transition-all transform bg-white shadow-sm dashboard-card rounded-xl hover:scale-105">
+            <div class="absolute bottom-0 right-0 w-20 h-20 -mb-10 -mr-10 rounded-full bg-purple-50"></div>
+            <div class="relative flex items-start">
+                <div class="p-3 text-purple-600 bg-purple-100 rounded-lg shadow-inner">
+                    <i class="text-xl fas fa-tasks"></i>
                 </div>
-                <div class="ml-4 flex-1">
+                <div class="flex-1 ml-4">
                     <h3 class="text-sm font-medium text-gray-500">Total Tugas</h3>
                     <p class="card-number floating-element" data-type="assignments"><?php echo e($assignments->count()); ?></p>
                     <div class="mt-2">
-                        <a href="<?php echo e(route('guru.assignments.index')); ?>" class="text-sm text-purple-600 hover:text-purple-800 inline-flex items-center group">
+                        <a href="<?php echo e(route('guru.assignments.index')); ?>" class="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 group">
                             <span>Kelola tugas</span>
-                            <i class="fas fa-arrow-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                            <i class="ml-1 text-xs transition-transform fas fa-arrow-right group-hover:translate-x-1"></i>
                         </a>
                     </div>
                 </div>
@@ -127,19 +127,19 @@
         </div>
         
         <!-- Upcoming Assignments Card -->
-        <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 transform transition-all hover:scale-105 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 w-20 h-20 bg-amber-50 rounded-full -mr-10 -mb-10"></div>
-            <div class="flex items-start relative">
-                <div class="p-3 rounded-lg bg-amber-100 text-amber-600 shadow-inner">
-                    <i class="fas fa-calendar text-xl"></i>
+        <div class="relative p-6 overflow-hidden transition-all transform bg-white shadow-sm dashboard-card rounded-xl hover:scale-105">
+            <div class="absolute bottom-0 right-0 w-20 h-20 -mb-10 -mr-10 rounded-full bg-amber-50"></div>
+            <div class="relative flex items-start">
+                <div class="p-3 rounded-lg shadow-inner bg-amber-100 text-amber-600">
+                    <i class="text-xl fas fa-calendar"></i>
                 </div>
-                <div class="ml-4 flex-1">
+                <div class="flex-1 ml-4">
                     <h3 class="text-sm font-medium text-gray-500">Tugas Mendatang</h3>
                     <p class="card-number floating-element" data-type="upcoming"><?php echo e($upcomingAssignments); ?></p>
                     <div class="mt-2">
-                        <a href="<?php echo e(route('guru.schedule.index')); ?>" class="text-sm text-amber-600 hover:text-amber-800 inline-flex items-center group">
+                        <a href="<?php echo e(route('guru.schedule.index')); ?>" class="inline-flex items-center text-sm text-amber-600 hover:text-amber-800 group">
                             <span>Lihat jadwal</span>
-                            <i class="fas fa-arrow-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                            <i class="ml-1 text-xs transition-transform fas fa-arrow-right group-hover:translate-x-1"></i>
                         </a>
                     </div>
                 </div>
@@ -147,45 +147,45 @@
         </div>
         
         <!-- Pending Grading Card -->
-        <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 transform transition-all hover:scale-105 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 w-20 h-20 bg-red-50 rounded-full -mr-10 -mb-10"></div>
-            <div class="flex items-start relative">
-                <div class="p-3 rounded-lg bg-red-100 text-red-600 shadow-inner">
-                    <i class="fas fa-clipboard-check text-xl"></i>
+        <div class="relative p-6 overflow-hidden transition-all transform bg-white shadow-sm dashboard-card rounded-xl hover:scale-105">
+            <div class="absolute bottom-0 right-0 w-20 h-20 -mb-10 -mr-10 rounded-full bg-red-50"></div>
+            <div class="relative flex items-start">
+                <div class="p-3 text-red-600 bg-red-100 rounded-lg shadow-inner">
+                    <i class="text-xl fas fa-clipboard-check"></i>
                 </div>
-                <div class="ml-4 flex-1">
+                <div class="flex-1 ml-4">
                     <h3 class="text-sm font-medium text-gray-500">Menunggu Penilaian</h3>
                     <p class="card-number floating-element <?php echo e(isset($pendingGradingCount) && $pendingGradingCount > 0 ? 'text-red-600' : ''); ?>" data-type="pendingGrading"><?php echo e($pendingGradingCount ?? 0); ?></p>
                     <div class="mt-2">
-                        <a href="<?php echo e(route('guru.grades.index')); ?>" class="text-sm text-red-600 hover:text-red-800 inline-flex items-center group">
+                        <a href="<?php echo e(route('guru.grades.index')); ?>" class="inline-flex items-center text-sm text-red-600 hover:text-red-800 group">
                             <span>Nilai sekarang</span>
-                            <i class="fas fa-arrow-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                            <i class="ml-1 text-xs transition-transform fas fa-arrow-right group-hover:translate-x-1"></i>
                         </a>
                     </div>
                 </div>
             </div>
             <?php if(isset($pendingGradingCount) && $pendingGradingCount > 0): ?>
-            <span class="absolute top-2 right-2 flex h-5 w-5 items-center justify-center">
-                <span class="animate-ping absolute h-4 w-4 rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative rounded-full h-3 w-3 bg-red-500"></span>
+            <span class="absolute flex items-center justify-center w-5 h-5 top-2 right-2">
+                <span class="absolute w-4 h-4 bg-red-400 rounded-full opacity-75 animate-ping"></span>
+                <span class="relative w-3 h-3 bg-red-500 rounded-full"></span>
             </span>
             <?php endif; ?>
         </div>
     </div>
     
     <!-- Main Content Area with 2 columns on larger screens -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">        <!-- Recent Submissions (Left Column) -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden transform transition hover:shadow-lg border border-gray-100/60">
-            <div class="card-header flex items-center justify-between p-6 border-b border-gray-100">
+    <div class="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">        <!-- Recent Submissions (Left Column) -->
+        <div class="overflow-hidden transition transform bg-white border shadow-sm lg:col-span-2 rounded-xl hover:shadow-lg border-gray-100/60">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100 card-header">
                 <div class="flex items-center">
-                    <div class="p-2 bg-green-100 rounded-lg mr-3">
-                        <i class="fas fa-file-alt text-green-500"></i>
+                    <div class="p-2 mr-3 bg-green-100 rounded-lg">
+                        <i class="text-green-500 fas fa-file-alt"></i>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-800">Pengumpulan Tugas Terbaru</h3>
                 </div>
-                <a href="<?php echo e(route('guru.assignments.index')); ?>" class="text-sm text-green-600 hover:text-green-800 font-medium hover:underline flex items-center group">
+                <a href="<?php echo e(route('guru.assignments.index')); ?>" class="flex items-center text-sm font-medium text-green-600 hover:text-green-800 hover:underline group">
                     <span>Lihat semua</span>
-                    <i class="fas fa-chevron-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                    <i class="ml-1 text-xs transition-transform fas fa-chevron-right group-hover:translate-x-1"></i>
                 </a>
             </div>
             <div class="p-6">
@@ -194,38 +194,37 @@
                         <?php $__currentLoopData = $recentSubmissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $submission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="flex items-center p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors duration-300 
                                 <?php echo e(!$submission->score && $submission->submitted_at ? 'bg-amber-50 border-amber-200' : ''); ?>">
-                                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4 overflow-hidden border-2 border-blue-200">
+                                <div class="flex items-center justify-center w-12 h-12 mr-4 overflow-hidden text-blue-600 bg-blue-100 border-2 border-blue-200 rounded-full">
                                     <?php if(isset($submission->student->profile_photo)): ?>
-                                        <img src="<?php echo e($submission->student->profile_photo); ?>" alt="<?php echo e($submission->student->name); ?>" class="h-full w-full object-cover">
+                                        <img src="<?php echo e($submission->student->profile_photo); ?>" alt="<?php echo e($submission->student->name); ?>" class="object-cover w-full h-full">
                                     <?php else: ?>
-                                        <i class="fas fa-user-graduate text-xl"></i>
+                                        <i class="text-xl fas fa-user-graduate"></i>
                                     <?php endif; ?>
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex flex-col sm:flex-row sm:justify-between">
                                         <h5 class="text-sm font-medium text-gray-800"><?php echo e($submission->student->name); ?></h5>
-                                        <span class="text-xs text-gray-500 mt-1 sm:mt-0"><?php echo e($submission->submitted_at ? $submission->submitted_at->diffForHumans() : 'Belum dikumpulkan'); ?></span>
+                                        <span class="mt-1 text-xs text-gray-500 sm:mt-0"><?php echo e($submission->submitted_at ? $submission->submitted_at->diffForHumans() : 'Belum dikumpulkan'); ?></span>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Mengumpulkan: <span class="font-medium text-blue-600"><?php echo e($submission->assignment->title); ?></span></p>
-                                    <div class="mt-2 flex justify-between items-center">
+                                    <p class="mt-1 text-xs text-gray-500">Mengumpulkan: <span class="font-medium text-blue-600"><?php echo e($submission->assignment->title); ?></span></p>
+                                    <div class="flex items-center justify-between mt-2">
                                         <span class="text-xs py-1 px-2 rounded-full <?php echo e($submission->score ? 'bg-green-100 text-green-700' : ($submission->submitted_at ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700')); ?>">
                                             <?php if($submission->score): ?>
-                                                <i class="fas fa-check-circle mr-1"></i> Dinilai: <?php echo e($submission->score); ?>/100
+                                                <i class="mr-1 fas fa-check-circle"></i> Dinilai: <?php echo e($submission->score); ?>/100
                                             <?php elseif($submission->submitted_at): ?>
-                                                <i class="fas fa-hourglass-half mr-1"></i> Menunggu penilaian
+                                                <i class="mr-1 fas fa-hourglass-half"></i> Menunggu penilaian
                                             <?php else: ?>
-                                                <i class="fas fa-clock mr-1"></i> Belum dikumpulkan
+                                                <i class="mr-1 fas fa-clock"></i> Belum dikumpulkan
                                             <?php endif; ?>
-                                        </span>
-                                        <div>
-                                            <a href="<?php echo e(route('guru.submissions.show', [$submission->assignment_id, $submission->id])); ?>" 
-                                               class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 py-1 px-3 rounded-full hover:shadow-sm transition-all">
-                                                <i class="fas fa-eye mr-1"></i> Lihat
+                                        </span>                                        <div>
+                                            <a href="<?php echo e(route('guru.assignments.submissions.show', [$submission->assignment_id, $submission->id])); ?>" 
+                                               class="px-3 py-1 text-xs text-blue-600 transition-all rounded-full bg-blue-50 hover:bg-blue-100 hover:shadow-sm">
+                                                <i class="mr-1 fas fa-eye"></i> Lihat
                                             </a>
                                             <?php if($submission->submitted_at && !$submission->score): ?>
                                             <a href="<?php echo e(route('guru.grades.edit', [$submission->id])); ?>" 
-                                               class="text-xs bg-green-50 text-green-600 hover:bg-green-100 py-1 px-3 rounded-full hover:shadow-sm transition-all ml-1">
-                                                <i class="fas fa-star mr-1"></i> Nilai
+                                               class="px-3 py-1 ml-1 text-xs text-green-600 transition-all rounded-full bg-green-50 hover:bg-green-100 hover:shadow-sm">
+                                                <i class="mr-1 fas fa-star"></i> Nilai
                                             </a>
                                             <?php endif; ?>
                                         </div>
@@ -234,12 +233,12 @@
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     <?php else: ?>
-                        <div class="text-center py-8">
-                            <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                                <i class="fas fa-inbox text-gray-400 text-xl"></i>
+                        <div class="py-8 text-center">
+                            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full">
+                                <i class="text-xl text-gray-400 fas fa-inbox"></i>
                             </div>
-                            <h5 class="text-gray-500 font-medium">Belum Ada Pengumpulan</h5>
-                            <p class="text-gray-400 text-sm mt-1">Siswa belum mengumpulkan tugas</p>
+                            <h5 class="font-medium text-gray-500">Belum Ada Pengumpulan</h5>
+                            <p class="mt-1 text-sm text-gray-400">Siswa belum mengumpulkan tugas</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -248,61 +247,61 @@
         
         <!-- Quick Actions (Right Column) -->
         <div>
-            <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center" id="quick-actions">
-                <div class="p-2 bg-indigo-100 rounded-lg mr-3">
-                    <i class="fas fa-bolt text-indigo-600"></i>
+            <h3 class="flex items-center mb-4 text-lg font-medium text-gray-800" id="quick-actions">
+                <div class="p-2 mr-3 bg-indigo-100 rounded-lg">
+                    <i class="text-indigo-600 fas fa-bolt"></i>
                 </div>
                 <span>Aksi Cepat</span>
             </h3>
             <div class="grid grid-cols-1 gap-4">
                 <!-- Create Assignment -->
-                <a href="<?php echo e(route('guru.assignments.create')); ?>" class="quick-action block bg-gradient-to-r from-gray-50 to-gray-100 hover:from-green-50 hover:to-green-50 border border-gray-200 p-4 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-md group">
+                <a href="<?php echo e(route('guru.assignments.create')); ?>" class="block p-4 transition-all duration-300 border border-gray-200 quick-action bg-gradient-to-r from-gray-50 to-gray-100 hover:from-green-50 hover:to-green-50 rounded-xl hover:-translate-y-2 hover:shadow-md group">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0 h-14 w-14 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow-md group-hover:shadow-green-200 transition-all duration-300 group-hover:scale-110">
-                            <i class="fas fa-clipboard-list text-lg"></i>
+                        <div class="flex items-center justify-center flex-shrink-0 text-white transition-all duration-300 shadow-md h-14 w-14 rounded-xl bg-gradient-to-br from-green-400 to-green-600 group-hover:shadow-green-200 group-hover:scale-110">
+                            <i class="text-lg fas fa-clipboard-list"></i>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-semibold text-gray-800 group-hover:text-green-600 transition-colors">Buat Tugas Baru</h4>
-                            <p class="text-xs text-gray-500 mt-1">Tambahkan tugas untuk siswa</p>
+                            <h4 class="text-sm font-semibold text-gray-800 transition-colors group-hover:text-green-600">Buat Tugas Baru</h4>
+                            <p class="mt-1 text-xs text-gray-500">Tambahkan tugas untuk siswa</p>
                         </div>
                     </div>
                 </a>
                 
                 <!-- Upload Materials -->
-                <a href="<?php echo e(route('guru.materials.create')); ?>" class="quick-action block bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-50 border border-gray-200 p-4 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-md group">
+                <a href="<?php echo e(route('guru.materials.create')); ?>" class="block p-4 transition-all duration-300 border border-gray-200 quick-action bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-50 rounded-xl hover:-translate-y-2 hover:shadow-md group">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0 h-14 w-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white shadow-md group-hover:shadow-blue-200 transition-all duration-300 group-hover:scale-110">
-                            <i class="fas fa-file-upload text-lg"></i>
+                        <div class="flex items-center justify-center flex-shrink-0 text-white transition-all duration-300 shadow-md h-14 w-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 group-hover:shadow-blue-200 group-hover:scale-110">
+                            <i class="text-lg fas fa-file-upload"></i>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Unggah Materi</h4>
-                            <p class="text-xs text-gray-500 mt-1">Tambahkan materi pembelajaran</p>
+                            <h4 class="text-sm font-semibold text-gray-800 transition-colors group-hover:text-blue-600">Unggah Materi</h4>
+                            <p class="mt-1 text-xs text-gray-500">Tambahkan materi pembelajaran</p>
                         </div>
                     </div>
                 </a>
                 
                 <!-- Record Attendance -->
-                <a href="<?php echo e(route('guru.attendance.create')); ?>" class="quick-action block bg-gradient-to-r from-gray-50 to-gray-100 hover:from-purple-50 hover:to-purple-50 border border-gray-200 p-4 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-md group">
+                <a href="<?php echo e(route('guru.attendance.create')); ?>" class="block p-4 transition-all duration-300 border border-gray-200 quick-action bg-gradient-to-r from-gray-50 to-gray-100 hover:from-purple-50 hover:to-purple-50 rounded-xl hover:-translate-y-2 hover:shadow-md group">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0 h-14 w-14 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white shadow-md group-hover:shadow-purple-200 transition-all duration-300 group-hover:scale-110">
-                            <i class="fas fa-clipboard-check text-lg"></i>
+                        <div class="flex items-center justify-center flex-shrink-0 text-white transition-all duration-300 shadow-md h-14 w-14 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 group-hover:shadow-purple-200 group-hover:scale-110">
+                            <i class="text-lg fas fa-clipboard-check"></i>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-semibold text-gray-800 group-hover:text-purple-600 transition-colors">Rekam Kehadiran</h4>
-                            <p class="text-xs text-gray-500 mt-1">Catat kehadiran siswa</p>
+                            <h4 class="text-sm font-semibold text-gray-800 transition-colors group-hover:text-purple-600">Rekam Kehadiran</h4>
+                            <p class="mt-1 text-xs text-gray-500">Catat kehadiran siswa</p>
                         </div>
                     </div>
                 </a>
                 
                 <!-- Grade Assignments -->
-                <a href="<?php echo e(route('guru.grades.index')); ?>" class="quick-action block bg-gradient-to-r from-gray-50 to-gray-100 hover:from-orange-50 hover:to-orange-50 border border-gray-200 p-4 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-md group">
+                <a href="<?php echo e(route('guru.grades.index')); ?>" class="block p-4 transition-all duration-300 border border-gray-200 quick-action bg-gradient-to-r from-gray-50 to-gray-100 hover:from-orange-50 hover:to-orange-50 rounded-xl hover:-translate-y-2 hover:shadow-md group">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0 h-14 w-14 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-md group-hover:shadow-orange-200 transition-all duration-300 group-hover:scale-110">
-                            <i class="fas fa-star text-lg"></i>
+                        <div class="flex items-center justify-center flex-shrink-0 text-white transition-all duration-300 shadow-md h-14 w-14 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 group-hover:shadow-orange-200 group-hover:scale-110">
+                            <i class="text-lg fas fa-star"></i>
                         </div>
                         <div class="ml-4">
-                            <h4 class="text-sm font-semibold text-gray-800 group-hover:text-orange-600 transition-colors">Nilai Tugas</h4>
-                            <p class="text-xs text-gray-500 mt-1">Berikan nilai pada tugas siswa</p>
+                            <h4 class="text-sm font-semibold text-gray-800 transition-colors group-hover:text-orange-600">Nilai Tugas</h4>
+                            <p class="mt-1 text-xs text-gray-500">Berikan nilai pada tugas siswa</p>
                         </div>
                     </div>
                 </a>
@@ -313,19 +312,19 @@
     <!-- Today's Schedule -->
     <div class="mb-10">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium text-gray-800 flex items-center">
-                <div class="p-2 bg-blue-100 rounded-lg mr-3 shadow-inner">
-                    <i class="fas fa-calendar-alt text-blue-600"></i>
+            <h3 class="flex items-center text-lg font-medium text-gray-800">
+                <div class="p-2 mr-3 bg-blue-100 rounded-lg shadow-inner">
+                    <i class="text-blue-600 fas fa-calendar-alt"></i>
                 </div>
                 <span>Jadwal Mengajar Hari Ini</span>
             </h3>
-            <a href="<?php echo e(route('guru.schedule.index')); ?>" class="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline flex items-center group">
+            <a href="<?php echo e(route('guru.schedule.index')); ?>" class="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline group">
                 <span>Lihat jadwal lengkap</span>
-                <i class="fas fa-chevron-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
+                <i class="ml-1 text-xs transition-transform fas fa-chevron-right group-hover:translate-x-1"></i>
             </a>
         </div>
         
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100/60">
+        <div class="overflow-hidden bg-white border shadow-sm rounded-xl border-gray-100/60">
             <div class="p-6">
                 <div class="space-y-4" id="today-schedule">                    <?php
                         try {
@@ -400,8 +399,8 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-500">Kelas: <span class="font-medium"><?php echo e($schedule->classroom->name); ?></span></p>
-                                    <div class="mt-1 flex justify-between items-center">                                        <span class="text-xs text-gray-600">
-                                            <i class="fas fa-clock mr-1"></i> 
+                                    <div class="flex items-center justify-between mt-1">                                        <span class="text-xs text-gray-600">
+                                            <i class="mr-1 fas fa-clock"></i> 
                                             <?php
                                                 $startTime = !empty($schedule->start_time) ? substr($schedule->start_time, 0, 5) : '--:--';
                                                 $endTime = !empty($schedule->end_time) ? substr($schedule->end_time, 0, 5) : '--:--';
@@ -410,7 +409,7 @@
 
                                         </span>
                                         <span class="text-xs text-gray-600">
-                                            <i class="fas fa-map-marker-alt mr-1"></i> 
+                                            <i class="mr-1 fas fa-map-marker-alt"></i> 
                                             <?php echo e($schedule->room ?: 'Ruang Kelas'); ?>
 
                                         </span>
@@ -419,12 +418,12 @@
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     <?php else: ?>
-                        <div class="text-center py-8">
-                            <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                                <i class="fas fa-calendar-times text-gray-400 text-xl"></i>
+                        <div class="py-8 text-center">
+                            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full">
+                                <i class="text-xl text-gray-400 fas fa-calendar-times"></i>
                             </div>
-                            <h5 class="text-gray-500 font-medium">Tidak Ada Jadwal Hari Ini</h5>
-                            <p class="text-gray-400 text-sm mt-1">Anda tidak memiliki jadwal mengajar untuk hari ini</p>
+                            <h5 class="font-medium text-gray-500">Tidak Ada Jadwal Hari Ini</h5>
+                            <p class="mt-1 text-sm text-gray-400">Anda tidak memiliki jadwal mengajar untuk hari ini</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -682,8 +681,8 @@
                     const notificationDot = document.createElement('span');
                     notificationDot.className = 'absolute top-2 right-2 flex h-5 w-5 items-center justify-center';
                     notificationDot.innerHTML = `
-                        <span class="animate-ping absolute h-4 w-4 rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative rounded-full h-3 w-3 bg-red-500"></span>
+                        <span class="absolute w-4 h-4 bg-red-400 rounded-full opacity-75 animate-ping"></span>
+                        <span class="relative w-3 h-3 bg-red-500 rounded-full"></span>
                     `;
                     parentCard.appendChild(notificationDot);
                 }
@@ -706,12 +705,12 @@
         
         if (submissions.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8">
-                    <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                        <i class="fas fa-inbox text-gray-400 text-xl"></i>
+                <div class="py-8 text-center">
+                    <div class="flex items-center justify-center w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full">
+                        <i class="text-xl text-gray-400 fas fa-inbox"></i>
                     </div>
-                    <h5 class="text-gray-500 font-medium">Belum Ada Pengumpulan</h5>
-                    <p class="text-gray-400 text-sm mt-1">Siswa belum mengumpulkan tugas</p>
+                    <h5 class="font-medium text-gray-500">Belum Ada Pengumpulan</h5>
+                    <p class="mt-1 text-sm text-gray-400">Siswa belum mengumpulkan tugas</p>
                 </div>
             `;
             return;
@@ -726,38 +725,38 @@
             
             let statusDisplay, statusClass;
             if (submission.score) {
-                statusDisplay = `<i class="fas fa-check-circle mr-1"></i> Dinilai: ${submission.score}/100`;
+                statusDisplay = `<i class="mr-1 fas fa-check-circle"></i> Dinilai: ${submission.score}/100`;
                 statusClass = 'bg-green-100 text-green-700';
             } else if (submission.submitted_at) {
-                statusDisplay = '<i class="fas fa-hourglass-half mr-1"></i> Menunggu penilaian';
+                statusDisplay = '<i class="mr-1 fas fa-hourglass-half"></i> Menunggu penilaian';
                 statusClass = 'bg-amber-100 text-amber-700';
             } else {
-                statusDisplay = '<i class="fas fa-clock mr-1"></i> Belum dikumpulkan';
+                statusDisplay = '<i class="mr-1 fas fa-clock"></i> Belum dikumpulkan';
                 statusClass = 'bg-gray-100 text-gray-700';
             }
             
             const actionButtons = submission.submitted_at && !submission.score
-                ? `<a href="${submission.detail_url}" class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 py-1 px-3 rounded-full hover:shadow-sm transition-all">
-                     <i class="fas fa-eye mr-1"></i> Lihat
+                ? `<a href="${submission.detail_url}" class="px-3 py-1 text-xs text-blue-600 transition-all rounded-full bg-blue-50 hover:bg-blue-100 hover:shadow-sm">
+                     <i class="mr-1 fas fa-eye"></i> Lihat
                    </a>
-                   <a href="/guru/grades/edit/${submission.id}" class="text-xs bg-green-50 text-green-600 hover:bg-green-100 py-1 px-3 rounded-full hover:shadow-sm transition-all ml-1">
-                     <i class="fas fa-star mr-1"></i> Nilai
+                   <a href="/guru/grades/edit/${submission.id}" class="px-3 py-1 ml-1 text-xs text-green-600 transition-all rounded-full bg-green-50 hover:bg-green-100 hover:shadow-sm">
+                     <i class="mr-1 fas fa-star"></i> Nilai
                    </a>`
-                : `<a href="${submission.detail_url}" class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 py-1 px-3 rounded-full hover:shadow-sm transition-all">
-                     <i class="fas fa-eye mr-1"></i> Lihat
+                : `<a href="${submission.detail_url}" class="px-3 py-1 text-xs text-blue-600 transition-all rounded-full bg-blue-50 hover:bg-blue-100 hover:shadow-sm">
+                     <i class="mr-1 fas fa-eye"></i> Lihat
                    </a>`;
             
             submissionEl.innerHTML = `
-                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4 overflow-hidden border-2 border-blue-200">
-                    <i class="fas fa-user-graduate text-xl"></i>
+                <div class="flex items-center justify-center w-12 h-12 mr-4 overflow-hidden text-blue-600 bg-blue-100 border-2 border-blue-200 rounded-full">
+                    <i class="text-xl fas fa-user-graduate"></i>
                 </div>
                 <div class="flex-1">
                     <div class="flex flex-col sm:flex-row sm:justify-between">
                         <h5 class="text-sm font-medium text-gray-800">${submission.student.name}</h5>
-                        <span class="text-xs text-gray-500 mt-1 sm:mt-0">${submission.time_ago}</span>
+                        <span class="mt-1 text-xs text-gray-500 sm:mt-0">${submission.time_ago}</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">Mengumpulkan: <span class="font-medium text-blue-600">${submission.assignment.title}</span></p>
-                    <div class="mt-2 flex justify-between items-center">
+                    <p class="mt-1 text-xs text-gray-500">Mengumpulkan: <span class="font-medium text-blue-600">${submission.assignment.title}</span></p>
+                    <div class="flex items-center justify-between mt-2">
                         <span class="text-xs py-1 px-2 rounded-full ${statusClass}">
                             ${statusDisplay}
                         </span>
@@ -779,12 +778,12 @@
         
         if (schedules.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8">
-                    <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                        <i class="fas fa-calendar-times text-gray-400 text-xl"></i>
+                <div class="py-8 text-center">
+                    <div class="flex items-center justify-center w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full">
+                        <i class="text-xl text-gray-400 fas fa-calendar-times"></i>
                     </div>
-                    <h5 class="text-gray-500 font-medium">Tidak Ada Jadwal Hari Ini</h5>
-                    <p class="text-gray-400 text-sm mt-1">Anda tidak memiliki jadwal mengajar untuk hari ini</p>
+                    <h5 class="font-medium text-gray-500">Tidak Ada Jadwal Hari Ini</h5>
+                    <p class="mt-1 text-sm text-gray-400">Anda tidak memiliki jadwal mengajar untuk hari ini</p>
                 </div>
             `;
             return;
@@ -828,13 +827,13 @@
                         </div>
                     </div>
                     <p class="text-xs text-gray-500">Kelas: <span class="font-medium">${schedule.classroom.name}</span></p>
-                    <div class="mt-1 flex justify-between items-center">
+                    <div class="flex items-center justify-between mt-1">
                         <span class="text-xs text-gray-600">
-                            <i class="fas fa-clock mr-1"></i> 
+                            <i class="mr-1 fas fa-clock"></i> 
                             ${schedule.start_time_formatted} - ${schedule.end_time_formatted}
                         </span>
                         <span class="text-xs text-gray-600">
-                            <i class="fas fa-map-marker-alt mr-1"></i> 
+                            <i class="mr-1 fas fa-map-marker-alt"></i> 
                             ${schedule.room || 'Ruang Kelas'}
                         </span>
                     </div>
@@ -856,4 +855,4 @@
     }
 </script>
 <?php $__env->stopPush(); ?>
-<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\SEMUA TENTANG KULIAH\SEMESTER 4\PA2\IMPLEMENTASI NEW\sman1-girsip\resources\views/guru/dashboard.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.dashboard', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\SEMUA TENTANG KULIAH\SEMESTER 4\PA2\IMPLEMENTASI NEW\sman1-girsip\resources\views/guru/dashboard.blade.php ENDPATH**/ ?>

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Classroom;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -109,36 +110,36 @@ class User extends Authenticatable
 
     /**
      * Get the subjects that the teacher teaches
-     * Alias for subjects() for backward compatibility
      */
     public function teacherSubjects()
     {
-        return $this->subjects();
+        return $this->belongsToMany(Subject::class, 'subject_teacher', 'teacher_id', 'subject_id');
     }
 
     /**
-     * Get the classrooms that the user teaches.
-     */
-    public function teachingClassrooms()
+     * Get the classrooms that the teacher teaches in
+     */    public function teachingClassrooms()
     {
-        // Looking at your existing relationships, it seems that a teacher
-        // might be related to classrooms through schedules instead
-        return $this->hasManyThrough(
-            Classroom::class,
-            Schedule::class,
-            'teacher_id', // Foreign key on the schedules table
-            'id', // Foreign key on the classrooms table
-            'id', // Local key on the users table
-            'classroom_id' // Local key on the schedules table
-        );
-    }
+        $subjectsQuery = $this->belongsToMany(Subject::class, 'subject_teacher', 'teacher_id', 'subject_id')
+                             ->select('subjects.id as subject_id');
+        
+        $directClassrooms = $this->belongsToMany(Classroom::class, 'classroom_teacher', 'teacher_id', 'classroom_id')
+                ->select([
+                    'classrooms.*',
+                    'classroom_teacher.teacher_id as pivot_teacher_id',
+                    'classroom_teacher.classroom_id as pivot_classroom_id'
+                ]);
 
-    /**
-     * Get the classrooms that this teacher is homeroom teacher of.
-     */
-    public function homeroomClasses()
-    {
-        return $this->hasMany(Classroom::class, 'homeroom_teacher_id');
+        $subjectClassrooms = Classroom::whereHas('subjects', function($query) use ($subjectsQuery) {
+                    $query->whereIn('subjects.id', $subjectsQuery->pluck('subject_id'));
+                })
+                ->select([
+                    'classrooms.*',
+                    DB::raw('NULL as pivot_teacher_id'),
+                    DB::raw('NULL as pivot_classroom_id')
+                ]);
+        
+        return $directClassrooms->union($subjectClassrooms)->distinct();
     }
 
     /**
@@ -161,6 +162,14 @@ class User extends Authenticatable
      * Get the assignments created by the user (teacher).
      */
     public function assignments()
+    {
+        return $this->hasMany(Assignment::class, 'teacher_id');
+    }
+    
+    /**
+     * Alias for assignments relation, specifically for teachers
+     */
+    public function teacherAssignments()
     {
         return $this->hasMany(Assignment::class, 'teacher_id');
     }
@@ -212,11 +221,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is teacher
+     * Check if user is teacher/guru
      */
     public function isTeacher()
     {
         return $this->hasRole('guru');
+    }
+
+    /**
+     * Alias for isTeacher() - for consistency with view/controller naming
+     */
+    public function isGuru()
+    {
+        return $this->isTeacher();
     }
 
     /**
@@ -275,5 +292,10 @@ class User extends Authenticatable
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
     }
 }

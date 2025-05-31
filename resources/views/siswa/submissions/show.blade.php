@@ -50,20 +50,37 @@
                 <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
                     <i class="fas fa-file-alt text-xl"></i>
                 </div>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-1">{{ $submission->assignment->title }}</h2>
+                <div>                    <h2 class="text-xl font-bold text-gray-900 mb-1">{{ $submission->assignment->title ?? 'Tugas' }}</h2>
                     <div class="flex items-center gap-4 text-sm text-gray-500">
                         <div class="flex items-center">
                             <i class="fas fa-book mr-1"></i>
-                            <span>{{ $submission->assignment->subject->name ?? 'N/A' }}</span>
+                            <span>
+                                @if($submission->assignment && $submission->assignment->subject)
+                                    {{ $submission->assignment->subject->name }}
+                                @else
+                                    Mata pelajaran tidak tersedia
+                                @endif
+                            </span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-user-tie mr-1"></i>
-                            <span>{{ $submission->assignment->teacher->name ?? 'N/A' }}</span>
+                            <span>
+                                @if($submission->assignment && $submission->assignment->teacher)
+                                    {{ $submission->assignment->teacher->name }}
+                                @else
+                                    Guru tidak tersedia
+                                @endif
+                            </span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-calendar-day mr-1"></i>
-                            <span>Deadline: {{ $submission->assignment->deadline->format('d M Y, H:i') }}</span>
+                            <span>Deadline: 
+                                @if($submission->assignment && $submission->assignment->deadline)
+                                    {{ $submission->assignment->deadline->format('d M Y, H:i') }}
+                                @else
+                                    Tidak ada tenggat
+                                @endif
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -74,7 +91,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <h4 class="text-sm font-medium text-gray-700 mb-2">Waktu Pengumpulan</h4>
-                    <p class="text-gray-800">{{ $submission->submitted_at->format('d M Y, H:i') }}</p>
+                    <p class="text-gray-800">
+                        @if($submission->submitted_at)
+                            {{ $submission->submitted_at->format('d M Y, H:i') }}
+                        @else
+                            Waktu pengumpulan tidak tersedia
+                        @endif
+                    </p>
                     @if($submission->isLate())
                         <p class="text-red-500 text-xs mt-1">
                             <i class="fas fa-exclamation-circle mr-1"></i>

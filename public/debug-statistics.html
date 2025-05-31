@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Statistics Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .debug-panel {
+            background-color: #1e293b;
+            color: #94a3b8;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+        }
+        .stat-card:hover {
+            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container px-4 py-8 mx-auto">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Statistics Debug Page</h1>
+            <p class="text-gray-600">Use this page to test Chart.js and debug layout issues</p>
+        </header>
+        
+        <div class="debug-panel">
+            <p>Chart.js Status: <span id="chart-status">Checking...</span></p>
+            <p>DOM Loaded: <span id="dom-status">Waiting...</span></p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2">
+            <div class="p-6 stat-card">
+                <h2 class="mb-4 text-lg font-semibold">Submission Timeline</h2>
+                <div class="relative h-64" id="chart-container" style="border: 1px solid #eee; border-radius: 5px;">
+                    <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
+                        <div class="w-8 h-8 border-4 border-indigo-600 rounded-full animate-spin border-t-transparent"></div>
+                        <span class="ml-3">Loading chart...</span>
+                    </div>
+                    <canvas id="timeline-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="p-6 stat-card">
+                <h2 class="mb-4 text-lg font-semibold">Score Distribution</h2>
+                <div class="relative h-64" id="pie-container">
+                    <canvas id="distribution-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex mt-8 space-x-4">
+            <button id="test-chart" class="px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700">
+                Test Chart Rendering
+            </button>
+            <button id="reload-page" class="px-4 py-2 font-bold text-white bg-gray-600 rounded hover:bg-gray-700">
+                Reload Page
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Update status when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('dom-status').textContent = 'Loaded ✓';
+            document.getElementById('dom-status').className = 'text-green-400';
+            
+            // Check Chart.js status
+            if (typeof Chart !== 'undefined') {
+                document.getElementById('chart-status').textContent = 'Loaded ✓ (version: ' + Chart.version + ')';
+                document.getElementById('chart-status').className = 'text-green-400';
+            } else {
+                document.getElementById('chart-status').textContent = 'Not available ✗';
+                document.getElementById('chart-status').className = 'text-red-400';
+                
+                // Try to load Chart.js
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
+                script.onload = function() {
+                    document.getElementById('chart-status').textContent = 'Loaded (after retry) ✓ (version: ' + Chart.version + ')';
+                    document.getElementById('chart-status').className = 'text-green-400';
+                };
+                script.onerror = function() {
+                    document.getElementById('chart-status').textContent = 'Failed to load ✗';
+                };
+                document.head.appendChild(script);
+            }
+            
+            // Set up button handlers
+            document.getElementById('test-chart').addEventListener('click', function() {
+                renderTestCharts();
+            });
+            
+            document.getElementById('reload-page').addEventListener('click', function() {
+                window.location.reload();
+            });
+            
+            // Hide the loading indicator
+            setTimeout(function() {
+                const chartLoading = document.getElementById('chart-loading');
+                if (chartLoading) chartLoading.style.display = 'none';
+            }, 1000);
+        });
+        
+        function renderTestCharts() {
+            // Sample data
+            const dates = ['2025-05-20', '2025-05-21', '2025-05-22', '2025-05-23', '2025-05-24'];
+            const counts = [5, 8, 12, 7, 3];
+            
+            const scoreLabels = ['A (80-100)', 'B (70-79)', 'C (60-69)', 'D (50-59)', 'E (0-49)'];
+            const scoreData = [15, 8, 5, 3, 1];
+            const colors = [
+                'rgba(34, 197, 94, 0.7)', // Green
+                'rgba(59, 130, 246, 0.7)', // Blue
+                'rgba(234, 179, 8, 0.7)',  // Yellow
+                'rgba(249, 115, 22, 0.7)', // Orange
+                'rgba(239, 68, 68, 0.7)'   // Red
+            ];
+            
+            try {
+                // Timeline chart
+                const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+                
+                if (window.timelineChart) {
+                    window.timelineChart.destroy();
+                }
+                
+                window.timelineChart = new Chart(timelineCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates.map(date => {
+                            const d = new Date(date);
+                            return d.toLocaleDateString('id-ID', { 
+                                day: 'numeric', 
+                                month: 'short' 
+                            });
+                        }),
+                        datasets: [{
+                            label: 'Submissions',
+                            data: counts,
+                            backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Distribution chart
+                const distributionCtx = document.getElementById('distribution-chart').getContext('2d');
+                
+                if (window.distributionChart) {
+                    window.distributionChart.destroy();
+                }
+                
+                window.distributionChart = new Chart(distributionCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: scoreLabels,
+                        datasets: [{
+                            data: scoreData,
+                            backgroundColor: colors,
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+                
+                // Success message
+                alert("Charts rendered successfully!");
+            } catch (error) {
+                console.error("Error rendering charts:", error);
+                alert("Failed to render charts: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

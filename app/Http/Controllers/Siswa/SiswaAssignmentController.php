@@ -14,17 +14,22 @@ use Illuminate\Support\Collection;
 
 class SiswaAssignmentController extends Controller
 {
+    public function __construct()
+    {
+        // Middleware is now handled in route definitions
+    }
+
     /**
      * Display all assignments for the student
-     */    public function index(Request $request)
+     */     
+    public function index(Request $request)
     {
         // Get the student's current user
         $student = Auth::user();
         $classroomId = $student->classroom_id;
-        
+
         // Get all active assignments
         $query = Assignment::query()
-            ->where('is_active', true)
             ->where(function($q) use ($classroomId, $student) {
                 // Get assignments for student's classroom if it exists
                 if ($classroomId) {
@@ -46,6 +51,15 @@ class SiswaAssignmentController extends Controller
                         $q->where('classrooms.id', $student->classroom_id);
                     });
                 });
+
+                // Get assignments by teacher subject matches
+                if ($classroomId) {
+                    $q->orWhereHas('subject.teachers', function($query) use ($student) {
+                        $query->whereHas('classrooms', function($q) use ($student) {
+                            $q->where('classrooms.id', $student->classroom_id);
+                        });
+                    });
+                }
             })
             ->with(['subject', 'teacher', 'submissions' => function($query) use ($student) {
                 $query->where('user_id', $student->id);
@@ -56,19 +70,20 @@ class SiswaAssignmentController extends Controller
             $query->where('subject_id', $request->subject);
         }
         
-        // Filter by status    
+        // Filter by status from request parameters
+        $status = $request->input('status');
         if ($status === 'completed') {
             $query->whereHas('submissions', function($query) {
-                $query->where('student_id', Auth::id());
+                $query->where('user_id', Auth::id());
             });
         } elseif ($status === 'pending') {
             $query->whereDoesntHave('submissions', function($query) {
-                $query->where('student_id', Auth::id());
+                $query->where('user_id', Auth::id());
             })->where('deadline', '>', now());
         } elseif ($status === 'overdue') {
             $query->where('deadline', '<', now())
                 ->whereDoesntHave('submissions', function($query) {
-                    $query->where('student_id', Auth::id());
+                    $query->where('user_id', Auth::id());
                 });
         }
         
@@ -141,88 +156,161 @@ class SiswaAssignmentController extends Controller
         // Get the current student
         $student = Auth::user();
         $studentClassroomId = $student->classroom_id;
-        $studentClassId = $student->class_id;  // If you track student class in User model
-        
+        $studentClassId = $student->class_id;
+
         // Check if the student has access via classroom or class
         $hasAccess = false;
-        
-        // Check if assignment is for student's classroom
+
+        // Check classroom access
         if ($studentClassroomId) {
-            $hasClassroomAccess = $assignment->classrooms()
+            $hasAccess = $assignment->classrooms()
                 ->where('classrooms.id', $studentClassroomId)
                 ->exists();
-                
-            if ($hasClassroomAccess) {
-                $hasAccess = true;
-            }
         }
-        
-        // Check if assignment is for student's class
-        if ($studentClassId && !$hasAccess) {
-            $hasClassAccess = $assignment->classes()
+
+        // If no classroom access, check class access
+        if (!$hasAccess && $studentClassId) {
+            $hasAccess = $assignment->schoolClasses()
                 ->where('school_classes.id', $studentClassId)
                 ->exists();
-                
-            if ($hasClassAccess) {
-                $hasAccess = true;
-            }
         }
-        
-        // If no access through either classroom or class, deny access
+
+        // If no access through either classroom or class, check subject access
+        if (!$hasAccess) {
+            $hasAccess = $assignment->subject()
+                ->whereHas('classrooms', function($query) use ($studentClassroomId) {
+                    $query->where('classrooms.id', $studentClassroomId);
+                })->exists();
+        }
+
+        // If still no access, check if assignment is for any subject taught in student's classroom
+        if (!$hasAccess) {
+            $hasAccess = $assignment->subject()
+                ->whereHas('teachers', function($query) use ($studentClassroomId) {
+                    $query->whereHas('classrooms', function($q) use ($studentClassroomId) {
+                        $q->where('classrooms.id', $studentClassroomId);
+                    });
+                })->exists();
+        }
+
+        // If no access through any means, deny access
         if (!$hasAccess) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         // Get student's submission for this assignment if it exists
         $submission = Submission::where('assignment_id', $assignment->id)
-            ->where('user_id', $student->id) // Assuming student_id is linked to user_id
+            ->where('user_id', $student->id)
             ->first();
-            
+
         return view('siswa.assignments.show', compact('assignment', 'submission'));
     }
       /**
      * Submit a solution for an assignment
      */    public function submit(Request $request, Assignment $assignment)
     {
-        // Get the student's classes
-        $studentClassroomIds = Auth::user()->classrooms()->pluck('classroom_id');
-        
-        // Verify assignment is for student's classroom
-        $hasAccess = $assignment->classes()->whereIn('class_id', $studentClassroomIds)->exists();
-        if (!$hasAccess) {
-            abort(403, 'Unauthorized action.');
+        // Get the current student
+        $student = Auth::user();
+        $studentClassroomId = $student->classroom_id;
+        $studentClassId = $student->class_id;
+
+        // Check if the student has access via classroom or class
+        $hasAccess = false;
+
+        // Check classroom access
+        if ($studentClassroomId) {
+            $hasAccess = $assignment->classrooms()
+                ->where('classrooms.id', $studentClassroomId)
+                ->exists();
         }
-        
-        // Check if deadline has passed
-        if ($assignment->isExpired()) {
-            return redirect()->route('siswa.assignments.show', $assignment)
+
+        // If no classroom access, check class access
+        if (!$hasAccess && $studentClassId) {
+            $hasAccess = $assignment->schoolClasses()
+                ->where('school_classes.id', $studentClassId)
+                ->exists();
+        }
+
+        // If no access through either classroom or class, check subject access
+        if (!$hasAccess) {
+            $hasAccess = $assignment->subject()
+                ->whereHas('classrooms', function($query) use ($studentClassroomId) {
+                    $query->where('classrooms.id', $studentClassroomId);
+                })->exists();
+        }
+
+        // If still no access, check if assignment is for any subject taught in student's classroom
+        if (!$hasAccess) {
+            $hasAccess = $assignment->subject()
+                ->whereHas('teachers', function($query) use ($studentClassroomId) {
+                    $query->whereHas('classrooms', function($q) use ($studentClassroomId) {
+                        $q->where('classrooms.id', $studentClassroomId);
+                    });
+                })->exists();
+        }
+
+        // If no access through any means, deny access
+        if (!$hasAccess) {
+            return redirect()->back()
+                ->with('error', 'Anda tidak memiliki akses untuk mengumpulkan tugas ini.');
+        }
+
+        // Check if deadline has passed and late submissions are not allowed
+        if ($assignment->isExpired() && !$assignment->allow_late_submission) {
+            return redirect()->route('siswa.assignments.show', $assignment->id)
                 ->with('error', 'Deadline untuk tugas ini telah terlewat.');
         }
-        
+
+        // Validate the request
         $validated = $request->validate([
             'file' => ['required', 'file', 'max:102400'], // 100MB max
             'notes' => ['nullable', 'string'],
         ]);
-        
-        // Check if student already submitted
-        $existingSubmission = Submission::where('assignment_id', $assignment->id)
-            ->where('student_id', Auth::id())
-            ->first();
-            
-        if ($existingSubmission) {
-            // Delete old file if it exists
-            if ($existingSubmission->file_path && Storage::exists($existingSubmission->file_path)) {
-                Storage::delete($existingSubmission->file_path);
+
+        try {
+            // Check if student already submitted
+            $existingSubmission = Submission::where('assignment_id', $assignment->id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if ($existingSubmission) {
+                // Delete old file if it exists
+                if ($existingSubmission->file_path && Storage::exists('public/' . $existingSubmission->file_path)) {
+                    Storage::delete('public/' . $existingSubmission->file_path);
+                }
+
+                // Get file information
+                $file = $request->file('file');
+                $fileExtension = $file->getClientOriginalExtension();
+                $filePath = $file->store('submissions/' . $assignment->id, 'public');
+                $fileSize = $this->formatFileSize($file->getSize());
+
+                // Update existing submission
+                $existingSubmission->update([
+                    'file_path' => $filePath,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_type' => $file->getMimeType(),
+                    'file_size' => $fileSize,
+                    'file_icon' => $this->getFileIconClass($fileExtension),
+                    'file_color' => $this->getFileColorClass($fileExtension),
+                    'notes' => $validated['notes'] ?? null,
+                    'submitted_at' => now(),
+                ]);
+
+                return redirect()->route('siswa.assignments.show', $assignment->id)
+                    ->with('success', 'Pengumpulan tugas berhasil diperbarui.');
             }
-            
-            // Get file information
+
+            // Get file information for new submission
             $file = $request->file('file');
             $fileExtension = $file->getClientOriginalExtension();
             $filePath = $file->store('submissions/' . $assignment->id, 'public');
             $fileSize = $this->formatFileSize($file->getSize());
-            
-            // Update existing submission
-            $existingSubmission->update([
+
+            // Create new submission
+            Submission::create([
+                'assignment_id' => $assignment->id,
+                'user_id' => Auth::id(),
                 'file_path' => $filePath,
                 'file_name' => $file->getClientOriginalName(),
                 'file_type' => $file->getMimeType(),
@@ -232,33 +320,13 @@ class SiswaAssignmentController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'submitted_at' => now(),
             ]);
-            
-            return redirect()->route('siswa.assignments.show', $assignment)
-                ->with('success', 'Pengumpulan tugas berhasil diperbarui.');
+
+            return redirect()->route('siswa.assignments.show', $assignment->id)
+                ->with('success', 'Tugas berhasil dikumpulkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat mengumpulkan tugas: ' . $e->getMessage());
         }
-        
-        // Get file information
-        $file = $request->file('file');
-        $fileExtension = $file->getClientOriginalExtension();
-        $filePath = $file->store('submissions/' . $assignment->id, 'public');
-        $fileSize = $this->formatFileSize($file->getSize());
-          // Create new submission
-        Submission::create([
-            'assignment_id' => $assignment->id,
-            'student_id' => Auth::id(),  // For compatibility with existing code
-            'user_id' => Auth::id(),     // The actual user relationship
-            'file_path' => $filePath,
-            'file_name' => $file->getClientOriginalName(),
-            'file_type' => $file->getMimeType(),
-            'file_size' => $fileSize,
-            'file_icon' => $this->getFileIconClass($fileExtension),
-            'file_color' => $this->getFileColorClass($fileExtension),
-            'notes' => $validated['notes'] ?? null,
-            'submitted_at' => now(),
-        ]);
-        
-        return redirect()->route('siswa.assignments.show', $assignment)
-            ->with('success', 'Tugas berhasil dikumpulkan.');
     }
     
     /**

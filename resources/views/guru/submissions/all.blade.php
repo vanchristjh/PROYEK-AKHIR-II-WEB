@@ -253,10 +253,21 @@
                                             <small class="text-muted">{{ $submission->student->id_number ?? '12345678' }}</small>
                                         </div>
                                     </div>
+                                </td>                                <td>{{ $submission->assignment->title ?? 'Judul Tugas' }}</td>
+                                <td>
+                                    @if($submission->student && $submission->student->classroom)
+                                        {{ $submission->student->classroom->name }}
+                                    @else
+                                        Kelas tidak tersedia
+                                    @endif
                                 </td>
-                                <td>{{ $submission->assignment->title ?? 'Judul Tugas' }}</td>
-                                <td>{{ $submission->student->classroom->name ?? 'X IPA 1' }}</td>
-                                <td>{{ $submission->created_at->format('d M Y H:i') ?? now()->format('d M Y H:i') }}</td>
+                                <td>
+                                    @if($submission->created_at)
+                                        {{ $submission->created_at->format('d M Y H:i') }}
+                                    @else
+                                        {{ now()->format('d M Y H:i') }}
+                                    @endif
+                                </td>
                                 <td>
                                     @if($submission->score)
                                         <span class="badge bg-success">Sudah Dinilai</span>
@@ -273,11 +284,11 @@
                                 </td>
                                 <td>
                                     <div class="d-flex">
-                                        <a href="{{ route('guru.submissions.show', ['assignment' => $submission->assignment_id, 'submission' => $submission->id]) }}" class="btn btn-sm btn-info me-1">
+                                        <a href="{{ route('guru.assignments.submissions.show', ['assignment' => $submission->assignment_id, 'submission' => $submission->id]) }}" class="btn btn-sm btn-info me-1">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         @if(!$submission->score)
-                                            <a href="{{ route('guru.submissions.edit', ['assignment' => $submission->assignment_id, 'submission' => $submission->id]) }}" class="btn btn-sm btn-primary me-1">
+                                            <a href="{{ route('guru.assignments.submissions.edit', ['assignment' => $submission->assignment_id, 'submission' => $submission->id]) }}" class="btn btn-sm btn-primary me-1">
                                                 <i class="fas fa-pen"></i>
                                             </a>
                                             <button type="button" class="btn btn-sm btn-success" onclick="openGradeModal('{{ $submission->id }}', '{{ $submission->student->name }}', '{{ $submission->assignment->title }}')">
@@ -407,11 +418,9 @@
         
         // Initialize the count
         updateSelectedCount();
-    });
-
-    function openGradeModal(submissionId, studentName, assignmentTitle) {
+    });    function openGradeModal(submissionId, studentName, assignmentTitle, assignmentId) {
         const modal = new bootstrap.Modal(document.getElementById('gradeModal'));
-        document.getElementById('gradeForm').action = "{{ route('guru.submissions.grade', '') }}/" + submissionId;
+        document.getElementById('gradeForm').action = "{{ url('guru/assignments') }}/" + assignmentId + "/submissions/" + submissionId + "/grade";
         document.getElementById('studentName').textContent = studentName;
         document.getElementById('assignmentTitle').textContent = assignmentTitle;
         modal.show();

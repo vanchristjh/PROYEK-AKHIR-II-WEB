@@ -1,9 +1,3 @@
-<div class="sidebar">    <div class="logo" style="padding: 20px; text-align: center;">
-        <img src="{{ asset('assets/images/logo.jpg') }}" alt="SMAN 1 Girsang Sipangan Bolon" style="width: 100px; height: 100px; display: block; object-fit: cover; border-radius: 10%; margin: 0 auto 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-        <h2 style="color: white; font-weight: bold; margin-top: 5px;">SMAN 1 Girsang Sipangan Bolon</h2>
-        <p style="color: rgba(255,255,255,0.8);">E-Learning System</p>
-    </div>
-
     <div class="sidebar-menu">
         <div class="menu-section">
             <h3><i class="fas fa-tachometer-alt sidebar-icon"></i> DASHBOARD</h3>

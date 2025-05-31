@@ -74,14 +74,23 @@ class Submission extends Model
     {
         return $this->belongsTo(User::class, 'graded_by');
     }
-    
-    /**
+      /**
      * Check if the submission was late.
      */
     public function getIsLateAttribute()
     {
         $deadline = $this->assignment->deadline ?? $this->assignment->due_date;
         return $deadline && $this->created_at->gt($deadline);
+    }
+    
+    /**
+     * Check if the submission was late.
+     *
+     * @return bool
+     */
+    public function isLate(): bool
+    {
+        return $this->getIsLateAttribute();
     }
     
     /**
@@ -161,11 +170,16 @@ class Submission extends Model
      */
     public function getHumanFileSizeAttribute()
     {
-        if (!$this->file_size) {
+        if (empty($this->file_size)) {
             return 'Unknown size';
         }
         
-        $bytes = $this->file_size;
+        // Convert to numeric value and ensure it's not negative
+        $bytes = is_numeric($this->file_size) ? max(0, floatval($this->file_size)) : 0;
+        
+        if ($bytes === 0) {
+            return '0 B';
+        }
         
         if ($bytes >= 1073741824) {
             return number_format($bytes / 1073741824, 2) . ' GB';
@@ -179,7 +193,7 @@ class Submission extends Model
             return number_format($bytes / 1024, 2) . ' KB';
         }
         
-        return $bytes . ' bytes';
+        return $bytes . ' B';
     }
     
     /**
@@ -216,6 +230,15 @@ class Submission extends Model
         if (!$this->file_path) return null;
         
         return url('storage/' . $this->file_path);
+    }
+      /**
+     * Check if this submission has been graded.
+     *
+     * @return bool
+     */
+    public function isGraded(): bool
+    {
+        return $this->score !== null;
     }
     
     /**

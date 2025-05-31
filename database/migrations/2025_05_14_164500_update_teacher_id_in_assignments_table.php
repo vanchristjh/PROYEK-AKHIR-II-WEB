@@ -5,49 +5,68 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+class UpdateTeacherIdInAssignmentsTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
-    {        // Make sure teacher_id exists
-        if (!Schema::hasColumn('assignments', 'teacher_id')) {
-            Schema::table('assignments', function (Blueprint $table) {
-                $table->unsignedBigInteger('teacher_id')->nullable()->after('subject_id');
-            });
-        }
-
-        // Update teacher_id with created_by for all rows where teacher_id is null if created_by exists
-        if (Schema::hasColumn('assignments', 'created_by')) {
-            DB::statement('UPDATE assignments SET teacher_id = created_by WHERE teacher_id IS NULL');
-        }
-
-        // Add foreign key constraint if it doesn't already exist        // Add foreign key if it doesn't already exist
-        if (!$this->hasConstraint('assignments', 'assignments_teacher_id_foreign')) {
-            // Just add the foreign key without trying to drop it first
-            Schema::table('assignments', function (Blueprint $table) {
-                // Add the foreign key
-                $table->foreign('teacher_id')->references('id')->on('users')->onDelete('cascade');
-            });
-        }
+    public function up()
+    {
+        // Check if the foreign key constraint already exists
+        $keyExists = $this->checkIfForeignKeyExists('assignments', 'assignments_teacher_id_foreign');
+        
+        Schema::table('assignments', function (Blueprint $table) use ($keyExists) {
+            // If the foreign key already exists, drop it first
+            if ($keyExists) {
+                $table->dropForeign('assignments_teacher_id_foreign');
+            }
+            
+            // Add a new foreign key with a different name
+            $table->foreign('teacher_id', 'assignments_teacher_id_foreign_new')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
+                  
+            // Add any other modifications needed for the assignments table
+        });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        // No need to reverse this as it's a data fix
-    }    /**
-     * Check if a constraint exists on a table
-     */
-    private function hasConstraint($table, $constraintName) 
-    {
-        // For SQLite, we'll need a different approach since it doesn't have INFORMATION_SCHEMA
-        // Unfortunately, SQLite doesn't provide an easy way to check constraint names
-        // For simplicity, we'll just return false to ensure the constraint gets created
-        // SQLite will handle duplicates gracefully
-        return false;
+        Schema::table('assignments', function (Blueprint $table) {
+            // Remove the foreign key we added
+            if (Schema::hasTable('assignments')) {
+                $table->dropForeign('assignments_teacher_id_foreign_new');
+            }
+        });
     }
-};
+    
+    /**
+     * Check if a foreign key exists on a table
+     *
+     * @param string $table
+     * @param string $foreignKey
+     * @return bool
+     */
+    private function checkIfForeignKeyExists($table, $foreignKey)
+    {
+        $database = DB::connection()->getDatabaseName();
+        
+        $result = DB::select("
+            SELECT COUNT(*) as count
+            FROM information_schema.TABLE_CONSTRAINTS
+            WHERE CONSTRAINT_SCHEMA = ?
+            AND TABLE_NAME = ?
+            AND CONSTRAINT_NAME = ?
+        ", [$database, $table, $foreignKey]);
+        
+        return $result[0]->count > 0;
+    }
+}

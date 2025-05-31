@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
+use App\Models\User;
 use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Submission;
@@ -26,49 +27,32 @@ class AssignmentController extends Controller
     public function index(Request $request)
     {
         $teacher = Auth::user();
-        
-        $assignmentsQuery = Assignment::with(['subject', 'classes'])
+        $assignmentsQuery = Assignment::with(['subject', 'schoolClasses'])
             ->where('teacher_id', $teacher->id)
             ->orderBy('created_at', 'desc');
-        
+
         // Filter by subject
         if ($request->has('subject') && $request->subject) {
             $assignmentsQuery->where('subject_id', $request->subject);
         }
-        
+
         // Filter by class
         if ($request->has('class') && $request->class) {
-            $assignmentsQuery->whereHas('classes', function ($query) use ($request) {
+            $assignmentsQuery->whereHas('schoolClasses', function($query) use ($request) {
                 $query->where('school_classes.id', $request->class);
             });
         }
-        
-        // Filter by status
-        if ($request->has('status')) {
-            if ($request->status === 'active') {
-                $assignmentsQuery->where('is_active', true)
-                    ->where(function ($query) {
-                        $query->where('deadline', '>=', now())
-                            ->orWhereNull('deadline');
-                    });
-            } elseif ($request->status === 'expired') {
-                $assignmentsQuery->where('deadline', '<', now());
-            } elseif ($request->status === 'inactive') {
-                $assignmentsQuery->where('is_active', false);
-            }
-        }
-        
-        $assignments = $assignmentsQuery->paginate(10)->withQueryString();
-        
-        // Get list of subjects and classes for filtering
-        $subjects = Subject::whereHas('assignments', function ($query) use ($teacher) {
-            $query->where('teacher_id', $teacher->id);
+
+        $assignments = $assignmentsQuery->paginate(10);        // Get subjects for filter dropdown
+        $subjects = Subject::whereHas('teachers', function($query) use ($teacher) {
+            $query->where('users.id', $teacher->id);
         })->get();
-        
-        $classes = SchoolClass::whereHas('assignments', function ($query) use ($teacher) {
-            $query->where('teacher_id', $teacher->id);
+
+        // Get classes for filter dropdown
+        $classes = SchoolClass::whereHas('subjects.teachers', function($query) use ($teacher) {
+            $query->where('users.id', $teacher->id);
         })->get();
-        
+
         return view('guru.assignments.index', compact('assignments', 'subjects', 'classes'));
     }
 
@@ -91,10 +75,31 @@ class AssignmentController extends Controller
     {
         try {
             \Log::info('Starting assignment creation', ['data' => $request->all()]);
-            
             // Validate input
             $validated = $this->validateAssignment($request);
             \Log::info('Input validation passed');
+            
+            // Manual validation for deadline
+            $deadline = Carbon::parse($validated['deadline']);
+            $now = Carbon::now();
+            \Log::info('Deadline validation', [
+                'deadline' => $deadline->toDateTimeString(),
+                'now' => $now->toDateTimeString(),
+                'difference_minutes' => $deadline->diffInMinutes($now, false)
+            ]);
+            
+            // Allow up to 2 minutes in the past to account for form filling delay
+            if ($deadline->lt($now) && $deadline->diffInMinutes($now) > 2) {
+                \Log::warning('Deadline is in the past', [
+                    'deadline' => $deadline->toDateTimeString(),
+                    'now' => $now->toDateTimeString()
+                ]);
+                // Don't throw error, just adjust to 1 hour from now
+                $validated['deadline'] = $now->addHour()->toDateTimeString();
+                \Log::info('Adjusted deadline to 1 hour from now', [
+                    'new_deadline' => $validated['deadline']
+                ]);
+            }
             
             // Start transaction
             DB::beginTransaction();
@@ -114,50 +119,72 @@ class AssignmentController extends Controller
                 // Create new assignment
                 \Log::info('Creating assignment record');
                 $assignment = new Assignment();
-                $assignment->title = $validated['title'];
-                $assignment->description = $validated['description'];
-                $assignment->subject_id = $validated['subject_id'];
-                $assignment->teacher_id = Auth::id();
-                $assignment->deadline = $validated['deadline'];
-                $assignment->file = $filePath;
-                $assignment->is_active = true;
-                $assignment->max_score = $validated['max_score'] ?? 100;
-                $assignment->allow_late_submission = $validated['allow_late_submission'] ?? false;
-                $assignment->late_submission_penalty = $validated['late_submission_penalty'] ?? 0;
                 
-                if (!$assignment->save()) {
-                    throw new \Exception('Failed to save assignment');
-                }
-                \Log::info('Assignment saved successfully', ['id' => $assignment->id]);
+                // Set assignment attributes
+                $assignmentData = [
+                    'title' => $validated['title'],
+                    'description' => $validated['description'],
+                    'subject_id' => $validated['subject_id'],
+                    'teacher_id' => Auth::id(),
+                    'deadline' => $validated['deadline'],
+                    'file' => $filePath,
+                    'is_active' => isset($validated['is_active']) ? (bool)$validated['is_active'] : true,
+                    'max_score' => isset($validated['max_score']) ? (int)$validated['max_score'] : 100,
+                    'allow_late_submission' => isset($validated['allow_late_submission']) ? (bool)$validated['allow_late_submission'] : false,
+                    'late_submission_penalty' => isset($validated['late_submission_penalty']) ? (int)$validated['late_submission_penalty'] : 0,
+                ];
                 
-                // First attach selected classes
-                if (!empty($validated['classes'])) {
-                    \Log::info('Attaching classes', ['classes' => $validated['classes']]);
-                    $assignment->classes()->attach($validated['classes']);
-                    
-                    // Get classrooms from SchoolClass model
-                    $classrooms = SchoolClass::whereIn('id', $validated['classes'])
-                        ->pluck('classroom_id')
-                        ->filter() // Remove any null values
-                        ->unique()
-                        ->values()
-                        ->all();
-                    
-                    // If no classrooms found or all are null, log a warning
-                    if (empty($classrooms)) {
-                        \Log::warning('No classroom_id found in the selected classes. This may cause assignments to appear on dashboard but not in task list.');
-                        \Log::info('Using classes IDs as classroom_ids as a fallback to ensure consistency');
-                        
-                        // As a fallback, use the class IDs as classroom IDs
-                        // This ensures assignments appear in both views even if classroom_id is not set in SchoolClass
-                        $assignment->classrooms()->attach($validated['classes']);
-                    } else {
-                        \Log::info('Attaching classrooms', ['classrooms' => $classrooms]);
-                        $assignment->classrooms()->attach($classrooms);
+                \Log::info('Assignment data prepared', $assignmentData);
+                
+                // Fill and save assignment
+                $assignment->fill($assignmentData);
+                
+                try {
+                    if (!$assignment->save()) {
+                        throw new \Exception('Failed to save assignment');
                     }
+                    \Log::info('Assignment saved successfully', [
+                        'id' => $assignment->id,
+                        'attributes' => $assignment->getAttributes()
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Error saving assignment', [
+                        'error' => $e->getMessage(),
+                        'data' => $assignmentData
+                    ]);
+                    throw $e;
+                }
+                  // First attach selected classes                
+                if (!empty($validated['classes'])) {
+                    \Log::info('Attaching school classes', ['classes' => $validated['classes']]);
                     
-                    // Create notifications for students in these classes
-                    $this->createStudentNotifications($assignment, $validated['classes']);
+                    try {
+                        // Attach school classes
+                        $assignment->schoolClasses()->sync($validated['classes']);
+                        \Log::info('School classes attached successfully');
+                        
+                        // Get classrooms associated with these school classes
+                        $classroomIds = SchoolClass::whereIn('id', $validated['classes'])
+                            ->whereNotNull('classroom_id')
+                            ->pluck('classroom_id')
+                            ->unique()
+                            ->values()
+                            ->all();
+                        
+                        if (!empty($classroomIds)) {
+                            $assignment->classrooms()->sync($classroomIds);
+                            \Log::info('Classrooms attached successfully', ['classroom_ids' => $classroomIds]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error attaching classes/classrooms', [
+                            'error' => $e->getMessage(),
+                            'classes' => $validated['classes']
+                        ]);
+                        throw $e;
+                    }
+                } else {
+                    \Log::warning('No classes selected for assignment');
+                    throw new \Exception('Pilih minimal satu kelas untuk tugas ini');
                 }
                 
                 \Log::info('Committing transaction');
@@ -198,19 +225,13 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
-        // Authorization check
-        if ($assignment->teacher_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        $assignment->load(['subject', 'classes', 'submissions.student.class']);
-        
-        // Submission statistics
+        // Load the subject and the submissions
+        $assignment->load(['subject', 'submissions']);
+
+        // Calculate submission statistics
         $submissionStats = [
             'total' => $assignment->submissions->count(),
-            'graded' => $assignment->submissions->filter(function($submission) {
-                return $submission->score !== null;
-            })->count(),
+            'graded' => $assignment->submissions->whereNotNull('score')->count(),
         ];
         
         return view('guru.assignments.show', compact('assignment', 'submissionStats'));
@@ -303,7 +324,7 @@ class AssignmentController extends Controller
             // Sync classes
             $assignment->classes()->sync($validated['classes']);
 
-            // Sync associated classrooms
+            // Sync with classrooms if provided
             $classrooms = SchoolClass::whereIn('id', $validated['classes'])
                 ->pluck('classroom_id')
                 ->filter() // Remove null values
@@ -351,12 +372,13 @@ class AssignmentController extends Controller
                 Storage::delete('public/' . $assignment->file);
             }
             
-            // Detach classes
-            $assignment->classes()->detach();
-            
-            // Delete assignment
+            // Detach all relationships
+            $assignment->schoolClasses()->detach();
+            $assignment->classrooms()->detach();
+
+            // Delete the assignment
             $assignment->delete();
-            
+
             DB::commit();
             
             return redirect()->route('guru.assignments.index')
@@ -394,11 +416,16 @@ class AssignmentController extends Controller
                 ];
             }
         }
-        
-        // Mark students who have submitted
+          // Mark students who have submitted
         foreach ($assignment->submissions as $submission) {
             if (isset($students[$submission->student_id])) {
-                $students[$submission->student_id]['has_submitted'] =
+                $students[$submission->student_id]['has_submitted'] = true;
+                $students[$submission->student_id]['submission'] = $submission;
+            }
+        }
+        
+        // Authorization check
+        if ($assignment->teacher_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -479,30 +506,39 @@ class AssignmentController extends Controller
     
     /**
      * Show batch grading interface.
-     */
+     */    
     public function batchGrade(Assignment $assignment)
     {
-        // Authorization check
-        if ($assignment->teacher_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+        $teacher = Auth::user();
+        
+        // Check if the assignment exists and is active
+        if (!$assignment || !$assignment->is_active) {
+            return redirect()->back()->with('error', 'Tugas tidak ditemukan atau tidak aktif.');
         }
         
-        $assignment->load(['subject', 'classes', 'submissions.student.class']);
-        
-        // Get submissions grouped by class
-        $classesList = $assignment->classes;
-        $submissionsByClass = [];
-        
-        foreach ($classesList as $class) {
-            $submissionsByClass[$class->id] = [
-                'class_name' => $class->name,
-                'submissions' => $submissions = $assignment->submissions->filter(function($submission) use ($class) {
-                    return $submission->student && $submission->student->class_id == $class->id;
-                })->sortBy(function($submission) {
-                    return $submission->student->name;
-                })
-            ];
+        // Check if the teacher has access to this assignment through the subject
+        $hasAccess = $teacher->teacherSubjects()->where('subjects.id', $assignment->subject_id)->exists();
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menilai tugas ini.');
         }
+
+        $assignment->load(['subject', 'classrooms', 'submissions.student.classroom']);
+        
+        // Get submissions with students and classrooms
+        $submissions = $assignment->submissions()->with('student.classroom')->get();
+        
+        // Group submissions by student's classroom
+        $submissionsByClass = $submissions->groupBy(function($submission) {
+            return optional($submission->student)->classroom_id ?? 'unassigned';
+        })->mapWithKeys(function($classSubmissions, $classroomId) {
+            $className = $classroomId == 'unassigned' ? 'Belum Ada Kelas' : 
+                optional($classSubmissions->first()->student->classroom)->name ?? 'Kelas Tidak Ditemukan';
+            
+            return [$classroomId => [
+                'class_name' => $className,
+                'submissions' => $classSubmissions->sortBy('student.name')
+            ]];
+        });
         
         return view('guru.assignments.batch-grade', compact('assignment', 'submissionsByClass'));
     }
@@ -670,21 +706,45 @@ class AssignmentController extends Controller
     
     /**
      * Validate an assignment request.
-     */
-    private function validateAssignment(Request $request)
+     */    private function validateAssignment(Request $request)
     {
-        return $request->validate([
+        \Log::info('Validating assignment request', ['request' => $request->all()]);
+        
+        $rules = [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'subject_id' => 'required|exists:subjects,id',
             'classes' => 'required|array',
             'classes.*' => 'exists:school_classes,id',
-            'deadline' => 'required|date|after:now',
-            'file' => 'nullable|file|max:20480', // 20MB limit
-            'max_score' => 'nullable|integer|min:0|max:100',
-            'allow_late_submission' => 'nullable|boolean',
+            'deadline' => 'required|date',
+            'file' => 'nullable|file|max:102400', // 100MB limit            'max_score' => 'nullable|integer|min:0|max:100',
+            'allow_late_submission' => 'required|in:0,1',
             'late_submission_penalty' => 'nullable|integer|min:0|max:100',
-        ]);
+            'is_active' => 'required|in:0,1',
+        ];
+        
+        $messages = [
+            'title.required' => 'Judul tugas wajib diisi',
+            'description.required' => 'Deskripsi tugas wajib diisi',
+            'subject_id.required' => 'Mata pelajaran wajib dipilih',
+            'subject_id.exists' => 'Mata pelajaran tidak valid',
+            'classes.required' => 'Pilih minimal satu kelas',
+            'deadline.required' => 'Deadline wajib diisi',
+            'deadline.date' => 'Format deadline tidak valid',
+            'deadline.after' => 'Deadline harus di masa depan',
+            'file.max' => 'Ukuran file maksimal 100MB',
+        ];
+        
+        try {
+            $validated = $request->validate($rules, $messages);
+            \Log::info('Validation successful');
+            return $validated;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', [
+                'errors' => $e->errors(),
+            ]);
+            throw $e;
+        }
     }
     
     /**
@@ -709,5 +769,345 @@ class AssignmentController extends Controller
                 $notification->save();
             }
         }
+    }
+    
+    /**
+     * Save batch grades for multiple submissions.
+     */
+    public function saveBatchGrade(Request $request, Assignment $assignment)
+    {
+        try {
+            $teacher = Auth::user();
+            
+            // Check if the assignment exists and is active
+            if (!$assignment || !$assignment->is_active) {
+                return redirect()->back()->with('error', 'Tugas tidak ditemukan atau tidak aktif.');
+            }
+            
+            // Check if the teacher has access to this assignment through the subject
+            $hasAccess = $teacher->teacherSubjects()->where('subjects.id', $assignment->subject_id)->exists();
+            if (!$hasAccess) {
+                return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menilai tugas ini.');
+            }
+
+            // Validate that at least one submission was selected
+            if (!$request->has('selected') || empty($request->selected)) {
+                return redirect()->back()->with('error', 'Pilih minimal satu siswa untuk dinilai.');
+            }
+
+            // Validate the existence of the submissions
+            $selectedSubmissions = Submission::whereIn('id', $request->selected)
+                ->where('assignment_id', $assignment->id)
+                ->get();
+
+            if ($selectedSubmissions->count() !== count($request->selected)) {
+                return redirect()->back()->with('error', 'Beberapa tugas yang dipilih tidak valid.');
+            }
+
+            // Validate the scores
+            $request->validate([
+                'scores' => 'required|array',
+                'scores.*' => 'required|numeric|min:0|max:100'
+            ], [
+                'scores.required' => 'Nilai siswa wajib diisi.',
+                'scores.*.required' => 'Nilai untuk setiap siswa yang dipilih wajib diisi.',
+                'scores.*.numeric' => 'Nilai harus berupa angka.',
+                'scores.*.min' => 'Nilai tidak boleh kurang dari 0.',
+                'scores.*.max' => 'Nilai tidak boleh lebih dari 100.'
+            ]);
+
+            // Start transaction
+            DB::beginTransaction();
+
+            try {
+                foreach ($selectedSubmissions as $submission) {
+                    $score = $request->input("scores.{$submission->id}");
+                    
+                    $submission->update([
+                        'score' => $score,
+                        'graded_at' => now(),
+                        'graded_by' => $teacher->id
+                    ]);
+                }
+
+                DB::commit();
+                return redirect()->back()->with('success', 'Nilai berhasil disimpan untuk ' . $selectedSubmissions->count() . ' siswa.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()
+                    ->with('error', 'Terjadi kesalahan saat menyimpan nilai: ' . $e->getMessage())
+                    ->withInput();
+            }
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+    
+    /**
+     * Show assignment statistics.
+     */    public function statistics(Assignment $assignment)
+    {
+        // Check teacher access
+        $teacher = auth()->user();
+        $hasAccess = $teacher->teacherSubjects()->where('subjects.id', $assignment->subject_id)->exists();
+        if (!$hasAccess) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Load necessary relationships
+        $assignment->load(['subject', 'classes', 'submissions']);
+        
+        // Get all active students from the assigned classes
+        $studentsCount = User::whereHas('student', function($query) use ($assignment) {
+            $query->whereIn('class_id', $assignment->classes->pluck('id'));
+        })->count();
+        
+        // Log statistics data for debugging
+        \Log::debug('Assignment statistics data', [
+            'assignment_id' => $assignment->id,
+            'title' => $assignment->title,
+            'students_count' => $studentsCount,
+            'submission_dates_count' => count($assignment->submissions->groupBy(function ($submission) {
+                return $submission->created_at->format('Y-m-d');
+            }))
+        ]);
+        
+        // Calculate submission statistics
+        $submissions = $assignment->submissions;
+        $submissionsCount = $submissions->count();
+        $lateSubmissions = $submissions->where('is_late', true)->count();
+        $onTimeSubmissions = $submissionsCount - $lateSubmissions;
+        $notSubmittedCount = $studentsCount - $submissionsCount;
+        
+        // Calculate submission rates
+        $submissionRate = $studentsCount > 0 ? round(($submissionsCount / $studentsCount) * 100, 1) : 0;
+        $lateSubmissionRate = $submissionsCount > 0 ? round(($lateSubmissions / $submissionsCount) * 100, 1) : 0;
+        
+        // Calculate grading statistics
+        $gradedSubmissions = $submissions->whereNotNull('score');
+        $gradedCount = $gradedSubmissions->count();
+        $pendingCount = $submissionsCount - $gradedCount;
+        $gradeRate = $submissionsCount > 0 ? round(($gradedCount / $submissionsCount) * 100, 1) : 0;
+        
+        // Calculate average score
+        $averageScore = round($gradedSubmissions->avg('score') ?? 0, 1);
+        
+        // Calculate score distribution
+        $scoreDistribution = [
+            'a' => 0, // 80-100
+            'b' => 0, // 70-79  
+            'c' => 0, // 60-69
+            'd' => 0, // 50-59
+            'e' => 0  // 0-49
+        ];
+        
+        foreach ($gradedSubmissions as $submission) {
+            $score = $submission->score;
+            if ($score >= 80) $scoreDistribution['a']++;
+            elseif ($score >= 70) $scoreDistribution['b']++;
+            elseif ($score >= 60) $scoreDistribution['c']++;
+            elseif ($score >= 50) $scoreDistribution['d']++;
+            else $scoreDistribution['e']++;
+        }
+        
+        // Submission timeline (group by date)
+        $submissionDates = $submissions->groupBy(function ($submission) {
+            return $submission->created_at->format('Y-m-d');
+        })->map(function ($group) {
+            return $group->count();
+        })->toArray();        return view('guru.assignments.statistics', compact(
+            'assignment',
+            'studentsCount',
+            'submissionsCount',
+            'submissionRate',
+            'lateSubmissions', 
+            'lateSubmissionRate',
+            'onTimeSubmissions',
+            'notSubmittedCount',
+            'gradedCount',
+            'gradeRate',
+            'pendingCount',
+            'averageScore',
+            'scoreDistribution',
+            'submissionDates'
+        ));
+    }
+    
+    /**
+     * Show alternative assignment statistics view.
+     */
+    public function statisticsAlt(Assignment $assignment)
+    {
+        // Reuse the same logic as the regular statistics method
+        $teacher = auth()->user();
+        $hasAccess = $teacher->teacherSubjects()->where('subjects.id', $assignment->subject_id)->exists();
+        if (!$hasAccess) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Load relationships
+        $assignment->load(['subject', 'classes', 'submissions']);
+        
+        // Get students count
+        $studentsCount = User::whereHas('student', function($query) use ($assignment) {
+            $query->whereIn('class_id', $assignment->classes->pluck('id'));
+        })->count();
+        
+        // Calculate submission statistics
+        $submissions = $assignment->submissions;
+        $submissionsCount = $submissions->count();
+        $lateSubmissions = $submissions->where('is_late', true)->count();
+        $onTimeSubmissions = $submissionsCount - $lateSubmissions;
+        $notSubmittedCount = $studentsCount - $submissionsCount;
+        
+        // Calculate submission rates
+        $submissionRate = $studentsCount > 0 ? round(($submissionsCount / $studentsCount) * 100, 1) : 0;
+        $lateSubmissionRate = $submissionsCount > 0 ? round(($lateSubmissions / $submissionsCount) * 100, 1) : 0;
+        
+        // Calculate grading statistics
+        $gradedSubmissions = $submissions->whereNotNull('score');
+        $gradedCount = $gradedSubmissions->count();
+        $pendingCount = $submissionsCount - $gradedCount;
+        $gradeRate = $submissionsCount > 0 ? round(($gradedCount / $submissionsCount) * 100, 1) : 0;
+        
+        // Calculate average score
+        $averageScore = round($gradedSubmissions->avg('score') ?? 0, 1);
+        
+        // Calculate score distribution
+        $scoreDistribution = [
+            'a' => 0, // 80-100
+            'b' => 0, // 70-79  
+            'c' => 0, // 60-69
+            'd' => 0, // 50-59
+            'e' => 0  // 0-49
+        ];
+        
+        foreach ($gradedSubmissions as $submission) {
+            $score = $submission->score;
+            if ($score >= 80) $scoreDistribution['a']++;
+            elseif ($score >= 70) $scoreDistribution['b']++;
+            elseif ($score >= 60) $scoreDistribution['c']++;
+            elseif ($score >= 50) $scoreDistribution['d']++;
+            else $scoreDistribution['e']++;
+        }
+        
+        // Submission timeline (group by date)
+        $submissionDates = $submissions->groupBy(function ($submission) {
+            return $submission->created_at->format('Y-m-d');
+        })->map(function ($group) {
+            return $group->count();
+        })->toArray();
+
+        // Render the alternative view
+        return view('guru.assignments.statistics-alt', compact(
+            'assignment',
+            'studentsCount',
+            'submissionsCount',
+            'submissionRate',
+            'lateSubmissions', 
+            'lateSubmissionRate',
+            'onTimeSubmissions',
+            'notSubmittedCount',
+            'gradedCount',
+            'gradeRate',
+            'pendingCount',
+            'averageScore',
+            'scoreDistribution',
+            'submissionDates'
+        ));
+    }
+    
+    /**
+     * Export assignment statistics to Excel
+     */
+    public function exportStatistics(Assignment $assignment)
+    {
+        // Security check
+        if ($assignment->teacher_id !== Auth::id()) {
+            return redirect()->route('guru.assignments.index')->with('error', 'Anda tidak memiliki akses ke tugas ini.');
+        }
+
+        // Calculate statistics (reuse from statistics method)
+        $studentsCount = User::whereHas('student', function($query) use ($assignment) {
+            $query->whereIn('class_id', $assignment->classes->pluck('id'));
+        })->count();
+        
+        $submissions = $assignment->submissions;
+        $submissionsCount = $submissions->count();
+        $lateSubmissions = $submissions->where('is_late', true)->count();
+        $onTimeSubmissions = $submissionsCount - $lateSubmissions;
+        $notSubmittedCount = $studentsCount - $submissionsCount;
+        
+        $gradedSubmissions = $submissions->whereNotNull('score');
+        $gradedCount = $gradedSubmissions->count();
+        $pendingCount = $submissionsCount - $gradedCount;
+        $averageScore = round($gradedSubmissions->avg('score') ?? 0, 1);
+
+        $stats = [
+            'studentsCount' => $studentsCount,
+            'submissionsCount' => $submissionsCount,
+            'lateSubmissions' => $lateSubmissions,
+            'onTimeSubmissions' => $onTimeSubmissions,
+            'notSubmittedCount' => $notSubmittedCount,
+            'gradedCount' => $gradedCount,
+            'pendingCount' => $pendingCount,
+            'averageScore' => $averageScore
+        ];
+
+        return Excel::download(
+            new \App\Exports\AssignmentStatisticsExport($assignment, $stats),
+            'statistik-tugas-' . $assignment->id . '.xlsx'
+        );
+    }
+
+    /**
+     * Export assignment statistics to PDF
+     */
+    public function exportStatisticsPdf(Assignment $assignment)
+    {
+        // Security check  
+        if ($assignment->teacher_id !== Auth::id()) {
+            return redirect()->route('guru.assignments.index')->with('error', 'Anda tidak memiliki akses ke tugas ini.');
+        }
+
+        // Calculate statistics (reuse from statistics method)
+        $assignment->load(['subject', 'classes', 'submissions']);
+        
+        $studentsCount = User::whereHas('student', function($query) use ($assignment) {
+            $query->whereIn('class_id', $assignment->classes->pluck('id'));
+        })->count();
+        
+        $submissions = $assignment->submissions;
+        $submissionsCount = $submissions->count();
+        $lateSubmissions = $submissions->where('is_late', true)->count();
+        $onTimeSubmissions = $submissionsCount - $lateSubmissions;
+        $notSubmittedCount = $studentsCount - $submissionsCount;
+        
+        $gradedSubmissions = $submissions->whereNotNull('score');
+        $gradedCount = $gradedSubmissions->count();
+        $pendingCount = $submissionsCount - $gradedCount;
+        $averageScore = round($gradedSubmissions->avg('score') ?? 0, 1);
+
+        $pdf = PDF::loadView('guru.assignments.statistics-pdf', [
+            'assignment' => $assignment,
+            'studentsCount' => $studentsCount,
+            'submissionsCount' => $submissionsCount, 
+            'lateSubmissions' => $lateSubmissions,
+            'onTimeSubmissions' => $onTimeSubmissions,
+            'notSubmittedCount' => $notSubmittedCount,
+            'gradedCount' => $gradedCount,
+            'pendingCount' => $pendingCount,
+            'averageScore' => $averageScore
+        ]);
+
+        return $pdf->download('statistik-tugas-' . $assignment->id . '.pdf');
     }
 }

@@ -1,0 +1,19 @@
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar-logo i {
+    font-size: 24px;
+    margin-right: 10px;
+    color: white;
+}
+
+.e-learning-text {
+    display: block;
+    font-size: 12px;
+    margin-top: -5px;
+}

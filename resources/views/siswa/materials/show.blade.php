@@ -183,39 +183,44 @@
 @section('content')
 <div class="container mx-auto">
     <div class="mb-6">
-        <a href="{{ route('siswa.materials.index') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-            <i class="fas fa-chevron-left mr-2 text-sm"></i>
+        <a href="{{ route('siswa.materials.index') }}" class="inline-flex items-center text-blue-600 transition-colors hover:text-blue-800">
+            <i class="mr-2 text-sm fas fa-chevron-left"></i>
             <span>Kembali ke Daftar Materi</span>
         </a>
     </div>
 
-    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100/50 mb-6">
+    <div class="mb-6 overflow-hidden bg-white border shadow-md rounded-xl border-gray-100/50">
         <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
             <div class="flex items-start justify-between">
                 <div class="flex items-start">
-                    <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-book-open text-xl"></i>
+                    <div class="p-3 mr-4 text-purple-600 bg-purple-100 rounded-full">
+                        <i class="text-xl fas fa-book-open"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <h1 class="flex items-center text-2xl font-bold text-gray-900">
                             {{ $material->title }}
                         </h1>
                         <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
                             <div class="flex items-center">
-                                <i class="fas fa-calendar-day mr-1"></i>
+                                <i class="mr-1 fas fa-calendar-day"></i>
                                 {{ $material->created_at->format('d M Y') }}
                             </div>
                             
-                            @if($material->teacher)
+                            @if($material->teacher && $material->teacher->name)
                             <div class="flex items-center">
-                                <i class="fas fa-user mr-1"></i>
-                                {{ $material->teacher->user->name }}
+                                <i class="mr-1 fas fa-user"></i>
+                                {{ $material->teacher->name }}
+                            </div>
+                            @else
+                            <div class="flex items-center">
+                                <i class="mr-1 fas fa-user"></i>
+                                <span class="text-gray-400">Guru tidak tersedia</span>
                             </div>
                             @endif
                             
                             @if($material->subject)
                             <div class="flex items-center">
-                                <i class="fas fa-book mr-1"></i>
+                                <i class="mr-1 fas fa-book"></i>
                                 {{ $material->subject->name }}
                             </div>
                             @endif
@@ -227,12 +232,16 @@
         
         <div class="p-6">
             <div class="prose max-w-none">
-                {!! $material->description !!}
+                @if($material->description)
+                    {!! nl2br(e($material->description)) !!}
+                @else
+                    <p class="italic text-gray-500">Tidak ada deskripsi tersedia.</p>
+                @endif
             </div>
             
             @if($material->file_path)
-            <div class="mt-8 pt-6 border-t border-gray-100">
-                <h3 class="text-lg font-medium text-gray-900 mb-3">Lampiran Materi</h3>
+            <div class="pt-6 mt-8 border-t border-gray-100">
+                <h3 class="mb-3 text-lg font-medium text-gray-900">Lampiran Materi</h3>
                 <div class="attachment-item">
                     <div class="attachment-info">
                         <div class="attachment-icon">
@@ -244,7 +253,7 @@
                         </div>
                     </div>
                     <a href="{{ asset('storage/' . $material->file_path) }}" class="download-btn" target="_blank">
-                        <i class="fas fa-download mr-1"></i> Unduh
+                        <i class="mr-1 fas fa-download"></i> Unduh
                     </a>
                 </div>
             </div>
@@ -252,9 +261,9 @@
         </div>
     </div>
     
-    <div class="bg-gray-50 border border-gray-100 rounded-lg p-4 text-sm text-gray-600">
+    <div class="p-4 text-sm text-gray-600 border border-gray-100 rounded-lg bg-gray-50">
         <div class="flex items-center">
-            <i class="fas fa-info-circle text-purple-500 mr-2"></i>
+            <i class="mr-2 text-purple-500 fas fa-info-circle"></i>
             <p>Materi pembelajaran ini dibuat pada {{ $material->created_at->format('d F Y') }} dan terakhir diperbarui pada {{ $material->updated_at->format('d F Y H:i') }}</p>
         </div>
     </div>

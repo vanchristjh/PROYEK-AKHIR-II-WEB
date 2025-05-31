@@ -50,10 +50,9 @@
             <form id="batch-grade-form" action="{{ route('guru.assignments.batch-grade.save', $assignment) }}" method="POST">
                 @csrf
                 
-                <!-- Tabs for classes -->
-                <div class="mb-6">
+                <!-- Tabs for classes -->                <div class="mb-6">
                     <div class="border-b border-gray-200">
-                        <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs" x-data="{ activeTab: '{{ array_key_first($submissionsByClass) }}' }">
+                        <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs" x-data="{ activeTab: '{{ $submissionsByClass->keys()->first() }}' }">
                             @foreach($submissionsByClass as $classId => $classData)
                                 <button 
                                     type="button"

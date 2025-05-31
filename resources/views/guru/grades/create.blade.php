@@ -59,11 +59,7 @@
                     <div class="form-group mb-5">
                         <label for="subject_id" class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-book text-gray-400"></i>
-                            </div>
-                            <select name="subject_id" id="subject_id" 
-                                class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
+                            <select id="subject_id" name="subject_id" required class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
                                 <option value="">Pilih Mata Pelajaran</option>
                                 @foreach($subjects as $subject)
                                     <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
@@ -81,17 +77,8 @@
                     <div class="form-group mb-5">
                         <label for="classroom_id" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-users text-gray-400"></i>
-                            </div>
-                            <select name="classroom_id" id="classroom_id" 
-                                class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
+                            <select id="classroom_id" name="classroom_id" required class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50" disabled>
                                 <option value="">Pilih Kelas</option>
-                                @foreach($classrooms as $classroom)
-                                    <option value="{{ $classroom->id }}" {{ old('classroom_id') == $classroom->id ? 'selected' : '' }}>
-                                        {{ $classroom->name }}
-                                    </option>
-                                @endforeach
                             </select>
                         </div>
                         @error('classroom_id')
@@ -99,21 +86,17 @@
                         @enderror
                     </div>
                     
-                    <!-- Student Selection - Will be populated via AJAX -->
+                    <!-- Student Selection -->
                     <div class="form-group mb-5">
                         <label for="student_id" class="block text-sm font-medium text-gray-700 mb-1">Siswa</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-user-graduate text-gray-400"></i>
-                            </div>
-                            <select name="student_id" id="student_id" 
-                                class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required disabled>
+                            <select id="student_id" name="student_id" required class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50" disabled>
                                 <option value="">Pilih Siswa</option>
                             </select>
+                            <div id="student-loading" class="absolute inset-y-0 right-0 pr-3 flex items-center hidden">
+                                <i class="fas fa-spinner fa-spin text-gray-400"></i>
+                            </div>
                         </div>
-                        <p id="student-loading" class="text-gray-500 text-xs mt-1 hidden">
-                            <i class="fas fa-spinner fa-spin mr-1"></i> Memuat daftar siswa...
-                        </p>
                         @error('student_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -121,23 +104,15 @@
                     
                     <!-- Assessment Type -->
                     <div class="form-group mb-5">
-                        <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Jenis Penilaian</label>
+                        <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Tipe Penilaian</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-clipboard-list text-gray-400"></i>
-                            </div>
-                            <select name="type" id="type" 
-                                class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
-                                <option value="">Pilih Jenis Penilaian</option>
-                                <option value="quiz" {{ old('type') == 'quiz' ? 'selected' : '' }}>Kuis</option>
-                                <option value="exam" {{ old('type') == 'exam' ? 'selected' : '' }}>Ujian</option>
-                                <option value="daily_task" {{ old('type') == 'daily_task' ? 'selected' : '' }}>Tugas Harian</option>
-                                <option value="practicum" {{ old('type') == 'practicum' ? 'selected' : '' }}>Praktikum</option>
-                                <option value="participation" {{ old('type') == 'participation' ? 'selected' : '' }}>Partisipasi</option>
-                                <option value="presentation" {{ old('type') == 'presentation' ? 'selected' : '' }}>Presentasi</option>
-                                <option value="project" {{ old('type') == 'project' ? 'selected' : '' }}>Proyek</option>
-                                <option value="midterm" {{ old('type') == 'midterm' ? 'selected' : '' }}>Ujian Tengah Semester</option>
-                                <option value="final" {{ old('type') == 'final' ? 'selected' : '' }}>Ujian Akhir Semester</option>
+                            <select id="type" name="type" required class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
+                                <option value="">Pilih Tipe</option>
+                                <option value="tugas" {{ old('type') == 'tugas' ? 'selected' : '' }}>Tugas</option>
+                                <option value="ulangan" {{ old('type') == 'ulangan' ? 'selected' : '' }}>Ulangan</option>
+                                <option value="ujian" {{ old('type') == 'ujian' ? 'selected' : '' }}>Ujian</option>
+                                <option value="keterampilan" {{ old('type') == 'keterampilan' ? 'selected' : '' }}>Keterampilan</option>
+                                <option value="sikap" {{ old('type') == 'sikap' ? 'selected' : '' }}>Sikap</option>
                             </select>
                         </div>
                         @error('type')
@@ -150,25 +125,18 @@
                         <div>
                             <label for="score" class="block text-sm font-medium text-gray-700 mb-1">Nilai</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-star text-gray-400"></i>
-                                </div>
-                                <input type="number" name="score" id="score" min="0" step="0.01" value="{{ old('score') }}" 
-                                    class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
+                                <input type="number" name="score" id="score" required min="0" step="0.01" value="{{ old('score') }}" 
+                                       class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
                             </div>
                             @error('score')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        
                         <div>
                             <label for="max_score" class="block text-sm font-medium text-gray-700 mb-1">Nilai Maksimal</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-chart-bar text-gray-400"></i>
-                                </div>
-                                <input type="number" name="max_score" id="max_score" min="1" step="0.01" value="{{ old('max_score', 100) }}" 
-                                    class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
+                                <input type="number" name="max_score" id="max_score" required min="1" step="0.01" value="{{ old('max_score', 100) }}" 
+                                       class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
                             </div>
                             @error('max_score')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -181,45 +149,21 @@
                         <div>
                             <label for="semester" class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-calendar-alt text-gray-400"></i>
-                                </div>                                <select name="semester" id="semester" 
-                                    class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
-                                    @php $currentSemester = getCurrentSemester(); @endphp
-                                    <option value="Ganjil" {{ old('semester', $currentSemester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
-                                    <option value="Genap" {{ old('semester', $currentSemester) == 'Genap' ? 'selected' : '' }}>Genap</option>
+                                <select id="semester" name="semester" required class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
+                                    <option value="">Pilih Semester</option>
+                                    <option value="1" {{ old('semester') == '1' ? 'selected' : '' }}>Semester 1</option>
+                                    <option value="2" {{ old('semester') == '2' ? 'selected' : '' }}>Semester 2</option>
                                 </select>
                             </div>
                             @error('semester')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        
                         <div>
-                            <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label>
+                            <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-1">Tahun Akademik</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-university text-gray-400"></i>
-                                </div>                                <select name="academic_year" id="academic_year" 
-                                    class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
-                                    @php
-                                        $currentAcademicYear = getCurrentAcademicYear();
-                                        $parts = explode('/', $currentAcademicYear);
-                                        $currentYear = $parts[0];
-                                        $nextYear = $parts[1];
-                                        $prevYear = $currentYear - 1;
-                                        $prevNextYear = $currentYear;
-                                    @endphp
-                                    <option value="{{ $prevYear }}/{{ $prevNextYear }}" {{ old('academic_year') == "$prevYear/$prevNextYear" ? 'selected' : '' }}>
-                                        {{ $prevYear }}/{{ $prevNextYear }}
-                                    </option>
-                                    <option value="{{ $currentAcademicYear }}" {{ old('academic_year', $currentAcademicYear) == $currentAcademicYear ? 'selected' : '' }}>
-                                        {{ $currentAcademicYear }}
-                                    </option>
-                                    <option value="{{ $nextYear }}/{{ $nextYear + 1 }}" {{ old('academic_year') == "$nextYear/" . ($nextYear + 1) ? 'selected' : '' }}>
-                                        {{ $nextYear }}/{{ $nextYear + 1 }}
-                                    </option>
-                                </select>
+                                <input type="text" name="academic_year" id="academic_year" required placeholder="2024/2025" value="{{ old('academic_year') }}" 
+                                       class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
                             </div>
                             @error('academic_year')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -231,8 +175,7 @@
                     <div class="form-group mb-5 md:col-span-2">
                         <label for="feedback" class="block text-sm font-medium text-gray-700 mb-1">Catatan/Feedback</label>
                         <div class="mt-1 rounded-md shadow-sm">
-                            <textarea name="feedback" id="feedback" rows="4" 
-                                class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300">{{ old('feedback') }}</textarea>
+                            <textarea name="feedback" id="feedback" rows="4" class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">{{ old('feedback') }}</textarea>
                         </div>
                         @error('feedback')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -292,10 +235,9 @@
         
         // Function to load students when both subject and classroom are selected
         function loadStudents() {
-            const subjectId = subjectSelect.value;
             const classroomId = classroomSelect.value;
             
-            if (!subjectId || !classroomId) {
+            if (!classroomId) {
                 studentSelect.disabled = true;
                 studentSelect.innerHTML = '<option value="">Pilih Siswa</option>';
                 return;
@@ -304,7 +246,8 @@
             // Show loading indicator
             studentLoading.classList.remove('hidden');
             studentSelect.disabled = true;
-              // Fetch students in this classroom
+            
+            // Fetch students in this classroom
             fetch(`/guru/classrooms/${classroomId}/students`)
                 .then(response => {
                     if (!response.ok) {
@@ -312,21 +255,20 @@
                     }
                     return response.json();
                 })
-                .then(data => {
+                .then(students => {
                     // Hide loading indicator
                     studentLoading.classList.add('hidden');
                     
                     // Populate student select
                     studentSelect.innerHTML = '<option value="">Pilih Siswa</option>';
                     
-                    if (data.length > 0) {
-                        data.forEach(student => {
+                    if (students.length > 0) {
+                        students.forEach(student => {
                             const option = document.createElement('option');
                             option.value = student.id;
-                            option.textContent = student.name + (student.nis ? ` (${student.nis})` : '');
+                            option.textContent = `${student.name} (${student.nis || 'NIS tidak tersedia'})`;
                             studentSelect.appendChild(option);
                         });
-                        
                         studentSelect.disabled = false;
                     } else {
                         studentSelect.innerHTML = '<option value="">Tidak ada siswa di kelas ini</option>';
@@ -351,7 +293,13 @@
             
             // Show loading for classrooms
             classroomSelect.disabled = true;
-              // Fetch classrooms for this subject
+            classroomSelect.innerHTML = '<option value="">Loading...</option>';
+            
+            // Reset student select
+            studentSelect.disabled = true;
+            studentSelect.innerHTML = '<option value="">Pilih Siswa</option>';
+            
+            // Fetch classrooms for this subject
             fetch(`/guru/subjects/${subjectId}/classrooms`)
                 .then(response => {
                     if (!response.ok) {
@@ -359,18 +307,17 @@
                     }
                     return response.json();
                 })
-                .then(data => {
+                .then(classrooms => {
                     // Populate classroom select
                     classroomSelect.innerHTML = '<option value="">Pilih Kelas</option>';
                     
-                    if (data.length > 0) {
-                        data.forEach(classroom => {
+                    if (classrooms.length > 0) {
+                        classrooms.forEach(classroom => {
                             const option = document.createElement('option');
                             option.value = classroom.id;
                             option.textContent = classroom.name;
                             classroomSelect.appendChild(option);
                         });
-                        
                         classroomSelect.disabled = false;
                     } else {
                         classroomSelect.innerHTML = '<option value="">Tidak ada kelas untuk mata pelajaran ini</option>';
@@ -390,7 +337,8 @@
         
         gradeForm.addEventListener('submit', function(e) {
             let hasError = false;
-              // Check if score is less than or equal to max score
+            
+            // Check if score is less than or equal to max score
             const score = parseFloat(document.getElementById('score').value);
             const maxScore = parseFloat(document.getElementById('max_score').value);
             const scoreInput = document.getElementById('score');
@@ -413,7 +361,8 @@
                 const errorMsg = document.querySelector('#score-error');
                 if (errorMsg) errorMsg.remove();
             }
-              // Check if all required fields are filled
+            
+            // Check if all required fields are filled
             const requiredFields = document.querySelectorAll('[required]');
             requiredFields.forEach(field => {
                 const fieldId = field.id;
@@ -426,7 +375,7 @@
                     const errorMsgContainer = document.querySelector(`#${fieldId}-error`) || document.createElement('p');
                     errorMsgContainer.id = `${fieldId}-error`;
                     errorMsgContainer.className = 'text-red-500 text-xs mt-1';
-                    errorMsgContainer.textContent = `${fieldLabel} tidak boleh kosong.`;
+                    errorMsgContainer.textContent = `${fieldLabel.replace('*', '').trim()} tidak boleh kosong.`;
                     
                     if (!document.querySelector(`#${fieldId}-error`)) {
                         field.parentNode.parentNode.appendChild(errorMsgContainer);
@@ -439,7 +388,8 @@
                     if (errorMsg) errorMsg.remove();
                 }
             });
-              if (hasError) {
+            
+            if (hasError) {
                 e.preventDefault();
                 
                 // Show error notification at the top
@@ -448,7 +398,7 @@
                 errorNotification.innerHTML = `
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                            <i class="fas fa-exclamation-circle"></i>
                         </div>
                         <div class="ml-3">
                             <p class="text-sm">Ada kesalahan pada form. Silakan periksa kembali.</p>
@@ -460,6 +410,7 @@
                 const form = document.getElementById('gradeForm');
                 form.insertBefore(errorNotification, form.firstChild);
                 
+                // Scroll to top
                 window.scrollTo(0, 0);
             }
         });

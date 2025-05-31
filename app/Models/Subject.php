@@ -13,14 +13,16 @@ class Subject extends Model
         'code',
         'name',
         'description'
-    ];    /**
+    ];    
+    
+    /**
      * The teachers that teach this subject.
      */
     public function teachers()
     {
         return $this->belongsToMany(User::class, 'subject_teacher', 'subject_id', 'teacher_id')
-                    ->where('users.role_id', 2) // Ensure only teacher role
-                    ->select('users.*'); // Explicitly select from users table to avoid ambiguous column error
+                    ->where('role_id', 2) // Ensure only teacher role
+                    ->withTimestamps();
     }
 
     /**
@@ -29,6 +31,14 @@ class Subject extends Model
     public function classrooms()
     {
         return $this->belongsToMany(Classroom::class, 'classroom_subject');
+    }
+
+    /**
+     * The school classes where this subject is taught.
+     */
+    public function schoolClasses()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_subject', 'subject_id', 'class_id')->withTimestamps();
     }
 
     /**

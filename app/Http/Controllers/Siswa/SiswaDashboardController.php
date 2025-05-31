@@ -18,10 +18,11 @@ class SiswaDashboardController extends Controller
      * Display the siswa dashboard.
      *
      * @return \Illuminate\Http\Response
-     */    public function index()
+     */    
+    public function index()
     {
         $user = Auth::user();
-          if (!$user->classroom) {
+        if (!$user->classroom) {
             // Handle case where student is not assigned to a classroom
             $stats = [
                 'subjects' => 0,
@@ -38,17 +39,18 @@ class SiswaDashboardController extends Controller
         
         // Get statistics
         $totalSubjects = $user->classroom->subjects()->count();
-        $totalAssignments = Assignment::whereHas('classes', function($query) use ($user) {
-            $query->where('school_classes.id', $user->classroom_id);
+        $totalAssignments = Assignment::whereHas('classrooms', function($query) use ($user) {
+            $query->where('classrooms.id', $user->classroom_id);
         })->count();
         
         $completedAssignments = Submission::where('student_id', $user->id)->count();
         $totalMaterials = Material::whereHas('subject.classrooms', function($query) use ($user) {
             $query->where('classrooms.id', $user->classroom_id);
         })->count();
-          // Using the correct relationship name 'classes' instead of 'classroom'
-        $assignmentCount = Assignment::whereHas('classes', function($query) use ($user) {
-            $query->where('school_classes.id', $user->classroom_id);
+  
+        // Using the correct relationship name 'classrooms' instead of 'classes'
+        $assignmentCount = Assignment::whereHas('classrooms', function($query) use ($user) {
+            $query->where('classrooms.id', $user->classroom_id);
         })->count();
         
         // Calculate attendance rate
@@ -82,24 +84,26 @@ class SiswaDashboardController extends Controller
             'attendanceRate' => $attendanceRate,
             'avgAssignmentScore' => $avgScore,
             'completionRate' => $completionRate,
-        ];        // Get upcoming assignments
-        $upcomingAssignments = Assignment::whereHas('classes', function($query) use ($user) {
-                $query->where('school_classes.id', $user->classroom_id);
-            })
-            ->with(['subject'])
-            ->where('deadline', '>=', now())
-            ->orderBy('deadline', 'asc')
-            ->take(5)
-            ->get();
+        ];
+        
+        // Get upcoming assignments
+        $upcomingAssignments = Assignment::whereHas('classrooms', function($query) use ($user) {
+            $query->where('classrooms.id', $user->classroom_id);
+        })
+        ->with(['subject'])
+        ->where('deadline', '>=', now())
+        ->orderBy('deadline', 'asc')
+        ->take(5)
+        ->get();
         
         // Get recent materials
         $recentMaterials = Material::whereHas('subject.classrooms', function($query) use ($user) {
-                $query->where('classrooms.id', $user->classroom_id);
-            })
-            ->with(['subject'])
-            ->orderBy('publish_date', 'desc')
-            ->take(3)
-            ->get();
+            $query->where('classrooms.id', $user->classroom_id);
+        })
+        ->with(['subject'])
+        ->orderBy('publish_date', 'desc')
+        ->take(3)
+        ->get();
             
         // Get recent announcements
         $recentAnnouncements = Announcement::with('author')
@@ -137,8 +141,8 @@ class SiswaDashboardController extends Controller
             ]);
         }        // Get statistics
         $totalSubjects = $user->classroom->subjects()->count();
-        $totalAssignments = Assignment::whereHas('classes', function($query) use ($user) {
-            $query->where('school_classes.id', $user->classroom_id);
+        $totalAssignments = Assignment::whereHas('classrooms', function($query) use ($user) {
+            $query->where('classrooms.id', $user->classroom_id);
         })->count();
         
         $completedAssignments = Submission::where('student_id', $user->id)->count();
@@ -179,8 +183,8 @@ class SiswaDashboardController extends Controller
             'avgAssignmentScore' => $avgScore,
             'completionRate' => $completionRate,
         ];        // Get upcoming assignments
-        $upcomingAssignments = Assignment::whereHas('classes', function($query) use ($user) {
-                $query->where('school_classes.id', $user->classroom_id);
+        $upcomingAssignments = Assignment::whereHas('classrooms', function($query) use ($user) {
+                $query->where('classrooms.id', $user->classroom_id);
             })
             ->with(['subject'])
             ->where('deadline', '>=', now())

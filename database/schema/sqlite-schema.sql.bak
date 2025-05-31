@@ -1,0 +1,868 @@
+CREATE TABLE IF NOT EXISTS "migrations"(
+  "id" integer primary key autoincrement not null,
+  "migration" varchar not null,
+  "batch" integer not null
+);
+CREATE TABLE IF NOT EXISTS "password_reset_tokens"(
+  "email" varchar not null,
+  "token" varchar not null,
+  "created_at" datetime,
+  primary key("email")
+);
+CREATE TABLE IF NOT EXISTS "sessions"(
+  "id" varchar not null,
+  "user_id" integer,
+  "ip_address" varchar,
+  "user_agent" text,
+  "payload" text not null,
+  "last_activity" integer not null,
+  primary key("id")
+);
+CREATE INDEX "sessions_user_id_index" on "sessions"("user_id");
+CREATE INDEX "sessions_last_activity_index" on "sessions"("last_activity");
+CREATE TABLE IF NOT EXISTS "cache"(
+  "key" varchar not null,
+  "value" text not null,
+  "expiration" integer not null,
+  primary key("key")
+);
+CREATE TABLE IF NOT EXISTS "cache_locks"(
+  "key" varchar not null,
+  "owner" varchar not null,
+  "expiration" integer not null,
+  primary key("key")
+);
+CREATE TABLE IF NOT EXISTS "jobs"(
+  "id" integer primary key autoincrement not null,
+  "queue" varchar not null,
+  "payload" text not null,
+  "attempts" integer not null,
+  "reserved_at" integer,
+  "available_at" integer not null,
+  "created_at" integer not null
+);
+CREATE INDEX "jobs_queue_index" on "jobs"("queue");
+CREATE TABLE IF NOT EXISTS "job_batches"(
+  "id" varchar not null,
+  "name" varchar not null,
+  "total_jobs" integer not null,
+  "pending_jobs" integer not null,
+  "failed_jobs" integer not null,
+  "failed_job_ids" text not null,
+  "options" text,
+  "cancelled_at" integer,
+  "created_at" integer not null,
+  "finished_at" integer,
+  primary key("id")
+);
+CREATE TABLE IF NOT EXISTS "failed_jobs"(
+  "id" integer primary key autoincrement not null,
+  "uuid" varchar not null,
+  "connection" text not null,
+  "queue" text not null,
+  "payload" text not null,
+  "exception" text not null,
+  "failed_at" datetime not null default CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX "failed_jobs_uuid_unique" on "failed_jobs"("uuid");
+CREATE TABLE IF NOT EXISTS "classroom_student"(
+  "id" integer primary key autoincrement not null,
+  "classroom_id" integer not null,
+  "user_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "classroom_student_classroom_id_user_id_unique" on "classroom_student"(
+  "classroom_id",
+  "user_id"
+);
+CREATE TABLE IF NOT EXISTS "classroom_subject"(
+  "id" integer primary key autoincrement not null,
+  "classroom_id" integer not null,
+  "subject_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade,
+  foreign key("subject_id") references "subjects"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "classroom_subject_classroom_id_subject_id_unique" on "classroom_subject"(
+  "classroom_id",
+  "subject_id"
+);
+CREATE TABLE IF NOT EXISTS "teachers"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "nip" varchar,
+  "specialization" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "name" varchar,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "teachers_nip_unique" on "teachers"("nip");
+CREATE TABLE IF NOT EXISTS "schedules"(
+  "id" integer primary key autoincrement not null,
+  "classroom_id" integer not null,
+  "subject_id" integer not null,
+  "teacher_id" integer not null,
+  "day" varchar not null,
+  "start_time" time not null,
+  "end_time" time not null,
+  "school_year" varchar not null,
+  "notes" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "created_by" integer,
+  "room" varchar,
+  foreign key("teacher_id") references users("id") on delete cascade on update no action,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("classroom_id") references classrooms("id") on delete cascade on update no action,
+  foreign key("created_by") references "users"("id") on delete set null
+);
+CREATE INDEX "schedules_day_classroom_id_index" on "schedules"(
+  "day",
+  "classroom_id"
+);
+CREATE INDEX "schedules_day_teacher_id_index" on "schedules"(
+  "day",
+  "teacher_id"
+);
+CREATE TABLE IF NOT EXISTS "submissions"(
+  "id" integer primary key autoincrement not null,
+  "assignment_id" integer not null,
+  "student_id" integer not null,
+  "file_path" varchar,
+  "submitted_at" datetime,
+  "score" numeric,
+  "feedback" text,
+  "notes" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "file_name" varchar,
+  "file_size" varchar,
+  "file_icon" varchar,
+  "file_color" varchar,
+  "status" varchar not null default 'submitted',
+  "graded_at" datetime,
+  "deleted_at" datetime,
+  foreign key("assignment_id") references "assignments"("id") on delete cascade,
+  foreign key("student_id") references "students"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "submissions_assignment_id_student_id_unique" on "submissions"(
+  "assignment_id",
+  "student_id"
+);
+CREATE TABLE IF NOT EXISTS "assignment_class"(
+  "id" integer primary key autoincrement not null,
+  "assignment_id" integer not null,
+  "class_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("assignment_id") references "assignments"("id") on delete cascade,
+  foreign key("class_id") references "school_classes"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "assignment_class_assignment_id_class_id_unique" on "assignment_class"(
+  "assignment_id",
+  "class_id"
+);
+CREATE TABLE IF NOT EXISTS "subjects"(
+  "id" integer primary key autoincrement not null,
+  "code" varchar not null,
+  "name" varchar not null,
+  "description" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "teacher_id" integer,
+  foreign key("teacher_id") references "users"("id") on delete set null
+);
+CREATE UNIQUE INDEX "subjects_code_unique" on "subjects"("code");
+CREATE TABLE IF NOT EXISTS "notifications"(
+  "id" varchar not null,
+  "type" varchar not null,
+  "notifiable_type" varchar not null,
+  "notifiable_id" integer not null,
+  "data" text not null,
+  "read_at" datetime,
+  "created_at" datetime,
+  "updated_at" datetime,
+  primary key("id")
+);
+CREATE INDEX "notifications_notifiable_type_notifiable_id_index" on "notifications"(
+  "notifiable_type",
+  "notifiable_id"
+);
+CREATE TABLE IF NOT EXISTS "students"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "nis" varchar not null,
+  "classroom_id" integer,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "name" varchar,
+  "gender" varchar check("gender" in('L', 'P')),
+  "birth_date" date,
+  "address" text,
+  "phone_number" varchar,
+  "email" varchar,
+  "status" varchar check("status" in('active', 'inactive')) not null default 'active',
+  "class_id" integer,
+  foreign key("classroom_id") references classrooms("id") on delete set null on update no action,
+  foreign key("user_id") references users("id") on delete cascade on update no action,
+  foreign key("class_id") references "school_classes"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "students_nis_unique" on "students"("nis");
+CREATE TABLE IF NOT EXISTS "assignment_submissions"(
+  "id" integer primary key autoincrement not null,
+  "assignment_id" integer not null,
+  "student_id" integer not null,
+  "file_path" varchar not null,
+  "file_name" varchar not null,
+  "notes" text,
+  "score" integer,
+  "feedback" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("assignment_id") references "assignments"("id") on delete cascade,
+  foreign key("student_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "assignment_submissions_assignment_id_student_id_unique" on "assignment_submissions"(
+  "assignment_id",
+  "student_id"
+);
+CREATE TABLE IF NOT EXISTS "activity_logs"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "action" varchar not null,
+  "description" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "model_type" varchar,
+  "model_id" integer,
+  "properties" text,
+  "ip_address" varchar,
+  "user_agent" text,
+  "type" varchar not null default 'system',
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "settings"(
+  "id" integer primary key autoincrement not null,
+  "key" varchar not null,
+  "value" text,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE UNIQUE INDEX "settings_key_unique" on "settings"("key");
+CREATE TABLE IF NOT EXISTS "roles"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "description" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "slug" varchar
+);
+CREATE UNIQUE INDEX "roles_name_unique" on "roles"("name");
+CREATE TABLE IF NOT EXISTS "role_user"(
+  "id" integer primary key autoincrement not null,
+  "role_id" integer not null,
+  "user_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("role_id") references "roles"("id") on delete cascade,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "role_user_role_id_user_id_unique" on "role_user"(
+  "role_id",
+  "user_id"
+);
+CREATE TABLE IF NOT EXISTS "materials"(
+  "id" integer primary key autoincrement not null,
+  "title" varchar not null,
+  "description" text,
+  "file_path" varchar,
+  "subject_id" integer not null,
+  "teacher_id" integer not null,
+  "publish_date" datetime not null default CURRENT_TIMESTAMP,
+  "is_active" tinyint(1) not null default '1',
+  "audience" text,
+  "expiry_date" datetime,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("subject_id") references "subjects"("id") on delete cascade,
+  foreign key("teacher_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "classroom_material"(
+  "id" integer primary key autoincrement not null,
+  "classroom_id" integer not null,
+  "material_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade,
+  foreign key("material_id") references "materials"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "users"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "email" varchar not null,
+  "email_verified_at" datetime,
+  "password" varchar not null,
+  "remember_token" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "preferences" text,
+  "classroom_id" integer,
+  "nisn" varchar,
+  "nip" varchar,
+  "id_number" varchar,
+  "role_id" integer,
+  "username" varchar not null,
+  "avatar" varchar,
+  foreign key("classroom_id") references classrooms("id") on delete set null on update no action,
+  foreign key("role_id") references "roles"("id")
+);
+CREATE UNIQUE INDEX "users_email_unique" on "users"("email");
+CREATE UNIQUE INDEX "users_username_unique" on "users"("username");
+CREATE VIEW student_users AS
+            SELECT u.*
+            FROM users u
+            INNER JOIN role_user ru ON u.id = ru.user_id
+            INNER JOIN roles r ON ru.role_id = r.id
+            WHERE r.name = 'siswa' OR r.name = 'student'
+/* student_users(id,name,email,email_verified_at,password,remember_token,created_at,updated_at,preferences,classroom_id,nisn,nip,id_number,role_id,username,avatar) */;
+CREATE INDEX "schedules_day_teacher_id_classroom_id_index" on "schedules"(
+  "day",
+  "teacher_id",
+  "classroom_id"
+);
+CREATE TABLE IF NOT EXISTS "subject_teacher"(
+  "id" integer primary key autoincrement not null,
+  "subject_id" integer not null,
+  "teacher_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("teacher_id") references users("id") on delete cascade on update no action,
+  foreign key("teacher_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "subject_teacher_subject_id_user_id_unique" on "subject_teacher"(
+  "subject_id",
+  "teacher_id"
+);
+CREATE TABLE IF NOT EXISTS "announcements"(
+  "id" integer primary key autoincrement not null,
+  "title" varchar not null,
+  "content" text not null,
+  "is_important" tinyint(1) not null default('0'),
+  "publish_date" datetime not null,
+  "audience" varchar not null default('all'),
+  "attachment" varchar,
+  "author_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "expiry_date" datetime,
+  foreign key("author_id") references users("id") on delete cascade on update no action,
+  foreign key("author_id") references users("id") on delete cascade on update no action,
+  foreign key("author_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "personal_access_tokens"(
+  "id" integer primary key autoincrement not null,
+  "tokenable_type" varchar not null,
+  "tokenable_id" integer not null,
+  "name" varchar not null,
+  "token" varchar not null,
+  "abilities" text,
+  "last_used_at" datetime,
+  "expires_at" datetime,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE INDEX "personal_access_tokens_tokenable_type_tokenable_id_index" on "personal_access_tokens"(
+  "tokenable_type",
+  "tokenable_id"
+);
+CREATE UNIQUE INDEX "personal_access_tokens_token_unique" on "personal_access_tokens"(
+  "token"
+);
+CREATE TABLE IF NOT EXISTS "attendances"(
+  "id" integer primary key autoincrement not null,
+  "classroom_id" integer not null,
+  "subject_id" integer not null,
+  "recorded_by" integer not null,
+  "date" date not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade,
+  foreign key("subject_id") references "subjects"("id") on delete cascade,
+  foreign key("recorded_by") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "attendances_classroom_id_subject_id_date_unique" on "attendances"(
+  "classroom_id",
+  "subject_id",
+  "date"
+);
+CREATE TABLE IF NOT EXISTS "attendance_records"(
+  "id" integer primary key autoincrement not null,
+  "attendance_id" integer not null,
+  "student_id" integer not null,
+  "status" varchar check("status" in('present', 'absent', 'late', 'sick', 'permitted')) not null default 'present',
+  "notes" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("attendance_id") references "attendances"("id") on delete cascade,
+  foreign key("student_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "attendance_records_attendance_id_student_id_unique" on "attendance_records"(
+  "attendance_id",
+  "student_id"
+);
+CREATE UNIQUE INDEX "roles_slug_unique" on "roles"("slug");
+CREATE TABLE IF NOT EXISTS "quizzes"(
+  "id" integer primary key autoincrement not null,
+  "title" varchar not null,
+  "description" text,
+  "subject_id" integer not null,
+  "teacher_id" integer not null,
+  "start_time" datetime,
+  "end_time" datetime,
+  "duration" integer not null,
+  "is_active" tinyint(1) not null default '1',
+  "max_attempts" integer not null default '1',
+  "randomize_questions" tinyint(1) not null default '0',
+  "show_result" tinyint(1) not null default '1',
+  "passing_score" float,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "deleted_at" datetime,
+  foreign key("subject_id") references "subjects"("id") on delete cascade,
+  foreign key("teacher_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "quiz_classroom"(
+  "id" integer primary key autoincrement not null,
+  "quiz_id" integer not null,
+  "classroom_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("quiz_id") references "quizzes"("id") on delete cascade,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "quiz_classroom_quiz_id_classroom_id_unique" on "quiz_classroom"(
+  "quiz_id",
+  "classroom_id"
+);
+CREATE TABLE IF NOT EXISTS "exams"(
+  "id" integer primary key autoincrement not null,
+  "title" varchar not null,
+  "description" text,
+  "subject_id" integer not null,
+  "teacher_id" integer not null,
+  "start_time" datetime,
+  "end_time" datetime,
+  "duration" integer not null,
+  "is_active" tinyint(1) not null default '1',
+  "max_attempts" integer not null default '1',
+  "randomize_questions" tinyint(1) not null default '0',
+  "show_result" tinyint(1) not null default '1',
+  "passing_score" float,
+  "exam_type" varchar not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "deleted_at" datetime,
+  foreign key("subject_id") references "subjects"("id") on delete cascade,
+  foreign key("teacher_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "exam_classroom"(
+  "id" integer primary key autoincrement not null,
+  "exam_id" integer not null,
+  "classroom_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("exam_id") references "exams"("id") on delete cascade,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "exam_classroom_exam_id_classroom_id_unique" on "exam_classroom"(
+  "exam_id",
+  "classroom_id"
+);
+CREATE TABLE IF NOT EXISTS "questions"(
+  "id" integer primary key autoincrement not null,
+  "content" text not null,
+  "type" varchar not null,
+  "points" integer not null default '1',
+  "correct_answer" text,
+  "explanation" text,
+  "difficulty_level" varchar,
+  "quiz_id" integer,
+  "exam_id" integer,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("quiz_id") references "quizzes"("id") on delete cascade,
+  foreign key("exam_id") references "exams"("id") on delete cascade
+);
+CREATE INDEX "questions_quiz_id_exam_id_index" on "questions"(
+  "quiz_id",
+  "exam_id"
+);
+CREATE TABLE IF NOT EXISTS "options"(
+  "id" integer primary key autoincrement not null,
+  "question_id" integer not null,
+  "content" text not null,
+  "is_correct" tinyint(1) not null default '0',
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("question_id") references "questions"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "quiz_attempts"(
+  "id" integer primary key autoincrement not null,
+  "quiz_id" integer not null,
+  "student_id" integer not null,
+  "started_at" datetime not null,
+  "completed_at" datetime,
+  "score" integer,
+  "max_score" integer,
+  "score_percentage" float,
+  "passed" tinyint(1),
+  "attempt_number" integer not null default '1',
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("quiz_id") references "quizzes"("id") on delete cascade,
+  foreign key("student_id") references "users"("id") on delete cascade
+);
+CREATE INDEX "quiz_attempts_quiz_id_student_id_attempt_number_index" on "quiz_attempts"(
+  "quiz_id",
+  "student_id",
+  "attempt_number"
+);
+CREATE TABLE IF NOT EXISTS "exam_attempts"(
+  "id" integer primary key autoincrement not null,
+  "exam_id" integer not null,
+  "student_id" integer not null,
+  "started_at" datetime not null,
+  "completed_at" datetime,
+  "score" integer,
+  "max_score" integer,
+  "score_percentage" float,
+  "passed" tinyint(1),
+  "attempt_number" integer not null default '1',
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("exam_id") references "exams"("id") on delete cascade,
+  foreign key("student_id") references "users"("id") on delete cascade
+);
+CREATE INDEX "exam_attempts_exam_id_student_id_attempt_number_index" on "exam_attempts"(
+  "exam_id",
+  "student_id",
+  "attempt_number"
+);
+CREATE TABLE IF NOT EXISTS "student_answers"(
+  "id" integer primary key autoincrement not null,
+  "question_id" integer not null,
+  "quiz_attempt_id" integer,
+  "exam_attempt_id" integer,
+  "option_id" integer,
+  "text_answer" text,
+  "score" integer,
+  "feedback" text,
+  "is_correct" tinyint(1),
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("question_id") references "questions"("id") on delete cascade,
+  foreign key("quiz_attempt_id") references "quiz_attempts"("id") on delete cascade,
+  foreign key("exam_attempt_id") references "exam_attempts"("id") on delete cascade,
+  foreign key("option_id") references "options"("id") on delete cascade
+);
+CREATE INDEX "student_answers_attempt_question_index" on "student_answers"(
+  "quiz_attempt_id",
+  "exam_attempt_id",
+  "question_id"
+);
+CREATE TABLE IF NOT EXISTS "assignment_notifications"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "title" varchar not null,
+  "message" text not null,
+  "type" varchar not null,
+  "data" text,
+  "sender_id" integer,
+  "is_read" tinyint(1) not null default '0',
+  "read_at" datetime,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "deleted_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade,
+  foreign key("sender_id") references "users"("id") on delete set null
+);
+CREATE TABLE IF NOT EXISTS "teacher_subjects"(
+  "id" integer primary key autoincrement not null,
+  "teacher_id" integer not null,
+  "subject_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("teacher_id") references "users"("id") on delete cascade,
+  foreign key("subject_id") references "subjects"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "teacher_subjects_teacher_id_subject_id_unique" on "teacher_subjects"(
+  "teacher_id",
+  "subject_id"
+);
+CREATE INDEX "activity_logs_model_type_model_id_index" on "activity_logs"(
+  "model_type",
+  "model_id"
+);
+CREATE TABLE IF NOT EXISTS "events"(
+  "id" integer primary key autoincrement not null,
+  "title" varchar not null,
+  "description" text,
+  "start_date" datetime not null,
+  "end_date" datetime not null,
+  "location" varchar,
+  "audience" varchar check("audience" in('all', 'teachers', 'students', 'admin')) not null default 'all',
+  "is_active" tinyint(1) not null default '1',
+  "image_path" varchar,
+  "created_by" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("created_by") references "users"("id")
+);
+CREATE INDEX "activity_logs_type_index" on "activity_logs"("type");
+CREATE TABLE IF NOT EXISTS "classroom_assignment"(
+  "id" integer primary key autoincrement not null,
+  "classroom_id" integer not null,
+  "assignment_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("classroom_id") references "classrooms"("id") on delete cascade,
+  foreign key("assignment_id") references "assignments"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "classroom_assignment_classroom_id_assignment_id_unique" on "classroom_assignment"(
+  "classroom_id",
+  "assignment_id"
+);
+CREATE TABLE IF NOT EXISTS "activity_log"(
+  "id" integer primary key autoincrement not null,
+  "log_name" varchar,
+  "description" text not null,
+  "subject_type" varchar,
+  "subject_id" integer,
+  "causer_type" varchar,
+  "causer_id" integer,
+  "properties" text,
+  "batch_uuid" varchar,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE INDEX "subject" on "activity_log"("subject_type", "subject_id");
+CREATE INDEX "causer" on "activity_log"("causer_type", "causer_id");
+CREATE INDEX "activity_log_log_name_index" on "activity_log"("log_name");
+CREATE TABLE IF NOT EXISTS "class_student"(
+  "id" integer primary key autoincrement not null,
+  "student_id" integer not null,
+  "class_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("student_id") references "users"("id") on delete cascade,
+  foreign key("class_id") references "school_classes"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "class_student_student_id_class_id_unique" on "class_student"(
+  "student_id",
+  "class_id"
+);
+CREATE TABLE IF NOT EXISTS "school_classes"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "grade" varchar,
+  "year" varchar,
+  "homeroom_teacher_id" integer,
+  "is_active" tinyint(1) not null default('1'),
+  "created_at" datetime,
+  "updated_at" datetime,
+  "deleted_at" datetime,
+  "classroom_id" integer,
+  foreign key("homeroom_teacher_id") references users("id") on delete set null on update no action,
+  foreign key("classroom_id") references "classrooms"("id") on delete set null
+);
+CREATE TABLE IF NOT EXISTS "classrooms"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "grade_level" varchar not null,
+  "academic_year" varchar,
+  "description" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "capacity" integer,
+  "room_number" varchar,
+  "homeroom_teacher_id" integer,
+  foreign key("homeroom_teacher_id") references users("id") on delete set null on update no action,
+  foreign key("homeroom_teacher_id") references users("id") on delete set null on update no action,
+  foreign key("homeroom_teacher_id") references "users"("id") on delete set null
+);
+CREATE TABLE IF NOT EXISTS "assignments"(
+  "id" integer primary key autoincrement not null,
+  "subject_id" integer not null,
+  "title" varchar not null,
+  "description" text,
+  "deadline" datetime not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "class_id" integer,
+  "deleted_at" datetime,
+  "file" varchar,
+  "file_name" varchar,
+  "max_score" integer not null default('100'),
+  "classroom_id" integer,
+  "attachment_path" varchar,
+  "attachment_name" varchar,
+  "teacher_id" integer,
+  "is_active" tinyint(1) not null default('1'),
+  "allow_late_submission" tinyint(1) not null default('0'),
+  "late_submission_penalty" integer not null default('0'),
+  "visibility" varchar not null default('visible'),
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("teacher_id") references users("id") on delete cascade on update no action,
+  foreign key("classroom_id") references classrooms("id") on delete cascade on update no action,
+  foreign key("class_id") references classrooms("id") on delete cascade on update no action,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("classroom_id") references classrooms("id") on delete no action on update no action,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("classroom_id") references classrooms("id") on delete cascade on update no action,
+  foreign key("teacher_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "grades"(
+  "id" integer primary key autoincrement not null,
+  "student_id" integer not null,
+  "subject_id" integer not null,
+  "teacher_id" integer not null,
+  "semester" varchar not null,
+  "academic_year" varchar not null,
+  "assignment_score" numeric,
+  "midterm_score" numeric,
+  "final_score" numeric,
+  "total_score" numeric,
+  "grade" varchar,
+  "comments" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("teacher_id") references users("id") on delete cascade on update no action,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("student_id") references users("id") on delete cascade on update no action,
+  foreign key("student_id") references students("id") on delete cascade on update no action,
+  foreign key("subject_id") references subjects("id") on delete cascade on update no action,
+  foreign key("teacher_id") references teachers("id") on delete cascade on update no action,
+  foreign key("teacher_id") references users("id") on delete cascade on update no action,
+  foreign key("student_id") references users("id") on delete cascade on update no action,
+  foreign key("subject_id") references "subjects"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "unique_student_subject_semester_year" on "grades"(
+  "student_id",
+  "subject_id",
+  "semester",
+  "academic_year"
+);
+
+INSERT INTO migrations VALUES(1,'0001_01_01_000000_create_users_table',1);
+INSERT INTO migrations VALUES(2,'0001_01_01_000001_create_cache_table',1);
+INSERT INTO migrations VALUES(3,'0001_01_01_000002_create_jobs_table',1);
+INSERT INTO migrations VALUES(4,'2023_00_01_000000_create_classrooms_table',1);
+INSERT INTO migrations VALUES(5,'2023_00_01_000001_create_subjects_table',1);
+INSERT INTO migrations VALUES(6,'2023_00_01_000002_create_schedules_table',1);
+INSERT INTO migrations VALUES(7,'2023_00_01_000003_create_classroom_subject_table',1);
+INSERT INTO migrations VALUES(8,'2023_01_01_000002_create_subject_teacher_table',1);
+INSERT INTO migrations VALUES(9,'2023_02_01_000000_create_teachers_table',1);
+INSERT INTO migrations VALUES(10,'2023_05_01_000000_create_students_table',1);
+INSERT INTO migrations VALUES(11,'2023_05_01_000001_create_classroom_student_table',1);
+INSERT INTO migrations VALUES(12,'2023_05_06_update_materials_table',1);
+INSERT INTO migrations VALUES(13,'2023_05_10_000000_add_file_column_to_submissions_table',1);
+INSERT INTO migrations VALUES(14,'2023_05_14_add_capacity_to_classrooms_table',1);
+INSERT INTO migrations VALUES(15,'2023_05_14_add_homeroom_teacher_id_to_classrooms',1);
+INSERT INTO migrations VALUES(16,'2023_05_15_000000_add_created_by_to_schedules_table',1);
+INSERT INTO migrations VALUES(17,'2023_05_15_000000_create_assignments_table',1);
+INSERT INTO migrations VALUES(18,'2023_05_15_000001_add_name_column_to_teachers_table',1);
+INSERT INTO migrations VALUES(19,'2023_05_15_200000_add_columns_to_schedules_table',1);
+INSERT INTO migrations VALUES(20,'2023_05_15_add_preferences_to_users_table',1);
+INSERT INTO migrations VALUES(21,'2023_05_16_add_audience_to_materials_table',1);
+INSERT INTO migrations VALUES(22,'2023_05_16_add_classroom_id_to_users_table',1);
+INSERT INTO migrations VALUES(23,'2023_05_16_add_is_active_to_materials_table',1);
+INSERT INTO migrations VALUES(24,'2023_05_17_000000_update_assignments_table_structure',1);
+INSERT INTO migrations VALUES(25,'2023_05_20_000001_add_name_column_to_teachers',1);
+INSERT INTO migrations VALUES(26,'2023_05_20_000001_add_name_column_to_teachers_table',1);
+INSERT INTO migrations VALUES(27,'2023_06_01_000000_create_submissions_table',1);
+INSERT INTO migrations VALUES(28,'2023_07_10_000001_create_announcements_table',1);
+INSERT INTO migrations VALUES(29,'2023_07_10_000001_create_school_classes_table',1);
+INSERT INTO migrations VALUES(30,'2023_07_12_000001_create_assignment_class_table',1);
+INSERT INTO migrations VALUES(31,'2023_07_15_000001_create_submissions_table',1);
+INSERT INTO migrations VALUES(32,'2023_07_16_000001_update_submissions_table',1);
+INSERT INTO migrations VALUES(33,'2023_07_20_000001_add_deleted_at_to_assignments_table',1);
+INSERT INTO migrations VALUES(34,'2023_07_25_000001_add_teacher_id_to_subjects_table',1);
+INSERT INTO migrations VALUES(35,'2023_08_01_000000_create_notifications_table',1);
+INSERT INTO migrations VALUES(36,'2023_08_01_000001_add_additional_columns_to_announcements_table',1);
+INSERT INTO migrations VALUES(37,'2023_08_01_create_school_classes_table',1);
+INSERT INTO migrations VALUES(38,'2023_08_01_create_students_table',1);
+INSERT INTO migrations VALUES(39,'2023_08_15_020000_create_assignment_submissions_table',1);
+INSERT INTO migrations VALUES(40,'2023_08_20_000000_create_activity_logs_table',1);
+INSERT INTO migrations VALUES(41,'2023_08_22_000000_update_assignments_table_structure',1);
+INSERT INTO migrations VALUES(42,'2023_08_25_000001_resolve_migration_conflicts',1);
+INSERT INTO migrations VALUES(43,'2023_10_25_000000_create_settings_table',1);
+INSERT INTO migrations VALUES(44,'2024_05_14_000000_create_subject_user_table',1);
+INSERT INTO migrations VALUES(45,'2024_05_15_000000_create_roles_table',1);
+INSERT INTO migrations VALUES(46,'2024_05_15_add_classroom_id_to_assignments_table',1);
+INSERT INTO migrations VALUES(47,'2024_05_15_add_deadline_to_assignments_table',1);
+INSERT INTO migrations VALUES(48,'2024_05_15_add_nisn_nip_to_users_table',1);
+INSERT INTO migrations VALUES(49,'2024_05_16_create_role_user_table',1);
+INSERT INTO migrations VALUES(50,'2024_06_10_000001_create_grades_table',1);
+INSERT INTO migrations VALUES(52,'2024_06_10_000005_add_foreign_keys_to_tables',1);
+INSERT INTO migrations VALUES(53,'2024_06_10_create_grade_model_migration',1);
+INSERT INTO migrations VALUES(54,'2024_06_13_000000_add_id_number_to_users_table',1);
+INSERT INTO migrations VALUES(55,'2024_06_17_100000_update_classroom_student_queries',1);
+INSERT INTO migrations VALUES(56,'2024_07_01_000001_create_materials_table',1);
+INSERT INTO migrations VALUES(57,'2024_07_02_000001_add_teacher_id_to_materials_table',1);
+INSERT INTO migrations VALUES(58,'2024_07_03_000002_add_role_id_to_users_table',1);
+INSERT INTO migrations VALUES(59,'2024_07_05_000010_create_classroom_material_table',1);
+INSERT INTO migrations VALUES(60,'2024_07_05_000101_add_day_column_to_schedules_table',1);
+INSERT INTO migrations VALUES(61,'2024_07_06_000001_add_foreign_keys_to_subject_teacher_table',1);
+INSERT INTO migrations VALUES(62,'2024_07_12_000001_modify_announcements_table',1);
+INSERT INTO migrations VALUES(63,'2024_07_12_000001_update_announcements_table_structure',1);
+INSERT INTO migrations VALUES(64,'2024_07_14_000001_update_announcements_table_add_expiry_date',1);
+INSERT INTO migrations VALUES(65,'2024_07_20_000001_fix_subject_teacher_table',1);
+INSERT INTO migrations VALUES(66,'2024_07_30_000001_standardize_subject_teacher_tables',1);
+INSERT INTO migrations VALUES(67,'2025_05_06_015335_create_personal_access_tokens_table',1);
+INSERT INTO migrations VALUES(68,'2025_05_06_164147_create_personal_access_tokens_table',2);
+INSERT INTO migrations VALUES(69,'2025_05_07_000000_fix_personal_access_tokens_migration',1);
+INSERT INTO migrations VALUES(70,'2025_05_08_014140_create_attendances_table',1);
+INSERT INTO migrations VALUES(71,'2025_05_08_020838_create_attendance_records_table',1);
+INSERT INTO migrations VALUES(72,'2025_05_14_000000_add_attachment_columns_to_assignments_table',1);
+INSERT INTO migrations VALUES(73,'2025_05_14_000000_add_teacher_id_to_assignments_table',1);
+INSERT INTO migrations VALUES(74,'2025_05_14_000000_rename_user_id_to_teacher_id_in_assignments_table',1);
+INSERT INTO migrations VALUES(75,'2025_05_14_000001_remove_teacher_id_from_assignments',1);
+INSERT INTO migrations VALUES(76,'2025_05_14_163827_add_teacher_id_to_assignments_table',1);
+INSERT INTO migrations VALUES(77,'2025_05_14_164500_update_teacher_id_in_assignments_table',1);
+INSERT INTO migrations VALUES(78,'2025_05_15_add_expiry_date_to_materials_table',1);
+INSERT INTO migrations VALUES(79,'2025_05_16_012033_add_slug_to_roles_table',1);
+INSERT INTO migrations VALUES(80,'2025_05_16_123217_update_assignments_table',1);
+INSERT INTO migrations VALUES(81,'2025_05_17_000000_remove_duplicate_migrations',1);
+INSERT INTO migrations VALUES(82,'2025_05_17_000000_remove_parent_role',1);
+INSERT INTO migrations VALUES(83,'2025_05_18_000000_remove_unused_tables_and_fix_models',1);
+INSERT INTO migrations VALUES(84,'2025_05_19_000000_final_migration_cleanup',1);
+INSERT INTO migrations VALUES(85,'2025_05_20_000001_create_quizzes_table',1);
+INSERT INTO migrations VALUES(86,'2025_05_20_000002_create_exams_table',1);
+INSERT INTO migrations VALUES(87,'2025_05_20_000003_create_questions_and_options_table',1);
+INSERT INTO migrations VALUES(88,'2025_05_20_000004_create_quiz_and_exam_attempts_table',1);
+INSERT INTO migrations VALUES(89,'2025_05_20_000005_create_student_answers_table',1);
+INSERT INTO migrations VALUES(90,'2025_05_20_create_activity_logs_table',1);
+INSERT INTO migrations VALUES(91,'2025_05_20_update_activity_logs_table',1);
+INSERT INTO migrations VALUES(92,'2025_05_21_023116_add_index_to_student_answers_table',1);
+INSERT INTO migrations VALUES(93,'2025_05_22_164839_modify_notifications_table_for_assignments',1);
+INSERT INTO migrations VALUES(94,'2025_05_24_000000_create_teacher_subjects_table',1);
+INSERT INTO migrations VALUES(95,'2025_05_25_000000_fix_activity_logs_table',1);
+INSERT INTO migrations VALUES(96,'2025_05_25_000000_fix_assignment_class_migration',1);
+INSERT INTO migrations VALUES(97,'2025_05_26_000000_create_events_table',1);
+INSERT INTO migrations VALUES(98,'2025_05_26_020000_add_missing_columns_to_activity_logs_table',1);
+INSERT INTO migrations VALUES(99,'2025_05_27_000000_create_activity_log_table',1);
+INSERT INTO migrations VALUES(100,'2025_05_27_000000_create_classroom_assignment_table',1);
+INSERT INTO migrations VALUES(101,'2025_05_27_000000_update_assignments_table',1);
+INSERT INTO migrations VALUES(102,'2025_05_27_000000_update_assignments_table_fields',1);
+INSERT INTO migrations VALUES(103,'2025_05_27_000001_add_missing_columns_to_assignments_table',1);
+INSERT INTO migrations VALUES(104,'2025_05_27_000001_create_activity_log_table',1);
+INSERT INTO migrations VALUES(105,'2025_05_27_045922_create_class_student_table',1);
+INSERT INTO migrations VALUES(106,'2025_05_28_000000_add_classroom_id_to_school_classes_table',1);
+INSERT INTO migrations VALUES(107,'2024_06_10_000005_add_foreign_keys',3);

@@ -1,7 +1,7 @@
 <!-- Dashboard -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-indigo-400 rounded-full"></span>
         Dashboard
     </div>
     <ul class="sidebar-items">
@@ -20,9 +20,9 @@
 </div>
 
 <!-- User Management -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-green-400 rounded-full"></span>
         Pengguna
     </div>
     <ul class="sidebar-items">
@@ -41,9 +41,9 @@
 </div>
 
 <!-- Academic Management -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-purple-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-purple-400 rounded-full"></span>
         Akademik
     </div>
     <ul class="sidebar-items">
@@ -83,9 +83,9 @@
 </div>
 
 <!-- Communication -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-red-400 rounded-full"></span>
         Komunikasi
     </div>
     <ul class="sidebar-items">
@@ -104,9 +104,9 @@
 </div>
 
 <!-- System & Account Settings -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 rounded-full bg-amber-400"></span>
         Akun
     </div>
     

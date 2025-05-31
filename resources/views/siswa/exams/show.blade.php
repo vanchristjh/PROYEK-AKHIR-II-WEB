@@ -72,9 +72,20 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <h3 class="font-semibold text-gray-700 mb-2">Informasi Ujian</h3>
-                        <ul class="space-y-1 text-gray-600">
-                            <li><span class="font-medium">Mata Pelajaran:</span> {{ $exam->subject->name }}</li>
-                            <li><span class="font-medium">Guru:</span> {{ $exam->teacher->name }}</li>
+                        <ul class="space-y-1 text-gray-600">                            <li><span class="font-medium">Mata Pelajaran:</span> 
+                                @if($exam->subject)
+                                    {{ $exam->subject->name }}
+                                @else
+                                    Mata pelajaran tidak tersedia
+                                @endif
+                            </li>
+                            <li><span class="font-medium">Guru:</span> 
+                                @if($exam->teacher)
+                                    {{ $exam->teacher->name }}
+                                @else
+                                    Guru tidak tersedia
+                                @endif
+                            </li>
                             <li><span class="font-medium">Jenis Ujian:</span> {{ ucfirst($exam->type) }}</li>
                             <li><span class="font-medium">Jumlah Soal:</span> {{ $exam->questions->count() }}</li>
                             <li><span class="font-medium">Durasi:</span> {{ $exam->duration }} menit</li>

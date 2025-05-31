@@ -18,10 +18,23 @@
             <p class="mt-1 text-sm text-gray-500">
                 Isi detail tugas yang ingin diberikan kepada siswa.
             </p>
-        </div>
-
-        <form action="{{ route('guru.assignments.store') }}" method="POST" enctype="multipart/form-data" class="p-6" id="assignment-form">
+        </div>        <form action="{{ route('guru.assignments.store') }}" method="POST" enctype="multipart/form-data" class="p-6" id="assignment-form">
             @csrf
+            @if(session('error'))
+                <div class="mb-4 rounded-md bg-red-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Error</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                {{ session('error') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2">
@@ -134,10 +147,10 @@
                                    class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         </div>
                         
-                        <div>
-                            <div class="flex items-start mt-5">
+                        <div>                            <div class="flex items-start mt-5">
                                 <div class="flex items-center h-5">
-                                    <input type="checkbox" name="allow_late_submission" id="allow_late_submission" 
+                                    <input type="hidden" name="allow_late_submission" value="0">
+                                    <input type="checkbox" name="allow_late_submission" id="allow_late_submission" value="1"
                                            class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
                                            {{ old('allow_late_submission') ? 'checked' : '' }}>
                                 </div>
@@ -196,8 +209,23 @@
                     </div>
                     @error('file')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>                <!-- is_active checkbox removed - column doesn't exist in database -->
+                    @enderror                </div>
+                  <div class="md:col-span-2">
+                    <div class="flex items-start mt-4">
+                        <div class="flex items-center h-5">
+                            <input type="hidden" name="is_active" value="0">
+                            <input type="checkbox" name="is_active" id="is_active" value="1"
+                                   class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                   {{ old('is_active', true) ? 'checked' : '' }}>
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="is_active" class="font-medium text-gray-700">
+                                Aktifkan Tugas
+                            </label>
+                            <p class="text-gray-500">Tugas akan langsung terlihat oleh siswa</p>
+                        </div>
+                    </div>
+                </div>
                 
             </div>
 
@@ -370,8 +398,7 @@
         
         // Form validation with improved error handling
         const form = document.getElementById('assignment-form');
-        if(form) {
-            form.addEventListener('submit', function(e) {
+        if(form) {        form.addEventListener('submit', function(e) {
                 let hasError = false;
                 const errorMessages = [];
                 
@@ -410,6 +437,9 @@
                 if(deadline && deadline.value) {
                     const deadlineDate = new Date(deadline.value);
                     const now = new Date();
+                    
+                    // Add some tolerance (2 minutes) to prevent validation issues due to slight time differences
+                    now.setMinutes(now.getMinutes() - 2);
                     
                     if(deadlineDate <= now) {
                         errorMessages.push('Deadline harus di masa depan');
@@ -450,6 +480,9 @@
                     }
                     return false;
                 }
+                
+                // Log successful form submission
+                console.log('Form validation passed, submitting...');
             });
         }
     });

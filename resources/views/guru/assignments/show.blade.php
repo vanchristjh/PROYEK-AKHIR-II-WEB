@@ -216,14 +216,16 @@
                     <div class="border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Kelas yang Ditugaskan</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            @foreach($assignment->classes as $class)
+                            @if($assignment->class_id && $assignment->classes && !is_null($assignment->classes->id))
                                 <div class="bg-gray-50 rounded-lg border border-gray-200 p-3 flex items-center">
                                     <div class="h-8 w-8 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
                                         <i class="fas fa-users"></i>
                                     </div>
-                                    <span class="text-gray-700">{{ $class->name }}</span>
+                                    <span class="text-gray-700">{{ $assignment->classes->name }}</span>
                                 </div>
-                            @endforeach
+                            @else
+                                <div class="col-span-3 text-gray-500 italic">Tidak ada kelas yang ditugaskan.</div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -234,8 +236,16 @@
         <div>
             <!-- Submission Statistics -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
-                <div class="p-4 border-b border-gray-200 bg-gray-50">
+                <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                     <h3 class="text-lg font-medium text-gray-900">Statistik Pengumpulan</h3>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('guru.assignments.submissions.export', $assignment) }}" class="px-3 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600 flex items-center">
+                            <i class="fas fa-file-excel mr-1"></i>Excel
+                        </a>
+                        <a href="{{ route('guru.assignments.submissions.export-pdf', $assignment) }}" class="px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 flex items-center">
+                            <i class="fas fa-file-pdf mr-1"></i>PDF
+                        </a>
+                    </div>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -324,7 +334,7 @@
                         </div>
                         @if($assignment->submissions->count() > 3)
                             <div class="mt-3 text-center">
-                                <a href="{{ route('guru.submissions.index', $assignment) }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                <a href="{{ route('guru.assignments.submissions.index', $assignment) }}" class="text-sm text-blue-600 hover:text-blue-800">
                                     Lihat semua pengumpulan ({{ $assignment->submissions->count() }})
                                 </a>
                             </div>

@@ -58,7 +58,7 @@
 
 @section('content')
     <div class="mb-6">
-        <a href="{{ route('guru.submissions.index', $assignment->id) }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition-colors">
+        <a href="{{ route('guru.assignments.submissions.index', $assignment->id) }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition-colors">
             <i class="fas fa-chevron-left mr-2 text-sm"></i>
             <span>Kembali ke Daftar Pengumpulan</span>
         </a>
@@ -105,11 +105,23 @@
                             <span>{{ $assignment->subject->name ?? 'N/A' }}</span>
                         </div>                        <div class="flex items-center">
                             <i class="fas fa-users mr-1"></i>
-                            <span>{{ $assignment->classes->first()->name ?? 'N/A' }}</span>
+                            <span>
+                                @if($assignment->classes && $assignment->classes->count() > 0)
+                                    {{ $assignment->classes->first()->name }}
+                                @else
+                                    Kelas tidak tersedia
+                                @endif
+                            </span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-calendar-day mr-1"></i>
-                            <span>Deadline: {{ $assignment->deadline->format('d M Y, H:i') }}</span>
+                            <span>Deadline: 
+                                @if($assignment->deadline)
+                                    {{ $assignment->deadline->format('d M Y, H:i') }}
+                                @else
+                                    Tidak ada tenggat waktu
+                                @endif
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -137,7 +149,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <h4 class="text-sm font-medium text-gray-700 mb-2">Waktu Pengumpulan</h4>
-                    <p class="text-gray-800">{{ $submission->submitted_at->format('d M Y, H:i') }}</p>
+                    <p class="text-gray-800">
+                        @if($submission->submitted_at)
+                            {{ $submission->submitted_at->format('d M Y, H:i') }}
+                        @else
+                            Waktu pengumpulan tidak tersedia
+                        @endif
+                    </p>
                     @if($submission->submitted_at->gt($assignment->deadline))
                         <p class="text-red-500 text-xs mt-1">
                             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -191,11 +209,10 @@
                             <p class="text-xs text-gray-500">Submitted file</p>
                         </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <a href="{{ route('guru.submissions.download', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
+                    <div class="flex space-x-2">                        <a href="{{ route('guru.assignments.submissions.download', [$assignment->id, $submission->id]) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
                             <i class="fas fa-download mr-1.5"></i> Download
                         </a>
-                        <a href="{{ route('guru.submissions.preview', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors" target="_blank">
+                        <a href="{{ route('guru.assignments.submissions.preview', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors" target="_blank">
                             <i class="fas fa-eye mr-1.5"></i> Preview
                         </a>
                     </div>
@@ -215,7 +232,7 @@
             <div class="border-t border-gray-200 pt-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Penilaian</h3>
                 
-                <form action="{{ route('guru.submissions.grade', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" method="POST" id="gradeForm">
+                <form action="{{ route('guru.assignments.submissions.grade', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" method="POST" id="gradeForm">
                     @csrf
                     @method('PUT')
                     

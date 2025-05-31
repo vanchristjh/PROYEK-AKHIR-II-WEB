@@ -148,19 +148,33 @@
                             </div>
                             <div class="ml-4 flex-1">
                                 <div class="flex flex-wrap justify-between">
-                                    <h4 class="text-base font-medium text-gray-800">{{ $submission->assignment->title }}</h4>
-                                    <span class="text-sm text-gray-500">Dikumpulkan {{ $submission->submitted_at->format('d M, H:i') }}</span>
+                                    <h4 class="text-base font-medium text-gray-800">
+                                        {{ $submission->assignment->title ?? 'Judul tidak tersedia' }}
+                                    </h4>
+                                    <span class="text-sm text-gray-500">
+                                        Dikumpulkan {{ $submission->submitted_at ? $submission->submitted_at->format('d M, H:i') : 'Waktu tidak tersedia' }}
+                                    </span>
                                 </div>
-                                <div class="flex items-center text-sm text-gray-600 mt-1 flex-wrap gap-2">
-                                    <span class="font-medium">{{ $submission->student->name }}</span>
+                                <div class="flex items-center text-sm text-gray-600 mt-1 flex-wrap gap-2">                                    <span class="font-medium">{{ $submission->student->name ?? 'Siswa tidak tersedia' }}</span>
                                     <span class="hidden sm:inline">•</span>
-                                    <span>{{ $submission->assignment->classroom->name }}</span>
+                                    <span>
+                                        @if($submission->assignment && $submission->assignment->classroom)
+                                            {{ $submission->assignment->classroom->name }}
+                                        @else
+                                            Kelas tidak tersedia
+                                        @endif
+                                    </span>
                                     <span class="hidden sm:inline">•</span>
-                                    <span>{{ $submission->assignment->subject->name }}</span>
+                                    <span>
+                                        @if($submission->assignment && $submission->assignment->subject)
+                                            {{ $submission->assignment->subject->name }}
+                                        @else
+                                            Mata pelajaran tidak tersedia
+                                        @endif
+                                    </span>
                                 </div>
-                                <div class="mt-3 flex justify-between items-center flex-wrap gap-y-2">
-                                    <div>
-                                        @if($submission->isGraded())
+                                <div class="mt-3 flex justify-between items-center flex-wrap gap-y-2">                                    <div>
+                                        @if($submission->score !== null)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <i class="fas fa-check-circle mr-1"></i> Nilai: {{ $submission->score }}
                                         </span>
@@ -171,7 +185,7 @@
                                         @endif
                                     </div>
                                     <a href="{{ route('guru.grades.edit', $submission->id) }}" class="text-sm font-medium text-green-600 hover:text-green-800 inline-flex items-center group">
-                                        <span>{{ $submission->isGraded() ? 'Edit nilai' : 'Beri nilai' }}</span>
+                                        <span>{{ $submission->score !== null ? 'Edit nilai' : 'Beri nilai' }}</span>
                                         <i class="fas fa-chevron-right ml-1 text-xs transition-transform group-hover:translate-x-1"></i>
                                     </a>
                                 </div>
@@ -357,15 +371,25 @@
                                       ($schedule->isUpcoming ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600') }} 
                                     flex items-center justify-center">
                                     <i class="fas fa-{{ $schedule->isOngoing ? 'chalkboard-teacher' : 'book' }}"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="font-medium text-gray-800">{{ $schedule->subject->name }}</p>
-                                    <div class="flex items-center text-sm text-gray-500 mt-1">
-                                        <i class="fas fa-clock mr-1.5 text-gray-400"></i>
-                                        <span>{{ $schedule->formatted_time }}</span>
+                                </div>                                <div class="ml-4">
+                                    <p class="font-medium text-gray-800">
+                                        @if($schedule->subject)
+                                            {{ $schedule->subject->name }}
+                                        @else
+                                            Mata pelajaran tidak tersedia
+                                        @endif
+                                    </p>
+                                    <div class="flex items-center text-sm text-gray-500 mt-1">                                        <i class="fas fa-clock mr-1.5 text-gray-400"></i>
+                                        <span>{{ $schedule->formatted_time ?? 'Waktu tidak tersedia' }}</span>
                                         <span class="mx-1.5">•</span>
                                         <i class="fas fa-users mr-1.5 text-gray-400"></i>
-                                        <span>{{ $schedule->classroom->name }}</span>
+                                        <span>
+                                            @if($schedule->classroom)
+                                                {{ $schedule->classroom->name }}
+                                            @else
+                                                Kelas tidak tersedia
+                                            @endif
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="ml-auto">

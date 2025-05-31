@@ -76,78 +76,89 @@
                         <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50">
                             <div class="flex-grow">
                                 <div class="flex justify-between items-center">
-                                    <span class="px-2 py-1 bg-blue-100 text-xs rounded-md text-blue-800">
-                                        {{ $grade->classroom->name }}
-                                    </span>
-                                    <span class="px-2 py-1 bg-green-100 text-xs rounded-md text-green-800">
-                                        {{ $grade->subject->name }}
-                                    </span>
-                                </div>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    <span class="font-medium">Tipe:</span> {{ $grade->type === 'assignment' ? 'Tugas' : ucfirst($grade->type) }}
-                                    @if($grade->assignment)
-                                    <span class="mx-1">•</span>
-                                    <span class="font-medium">Tugas:</span> {{ $grade->assignment->title }}
-                                    @endif
-                                </p>
+                                    <p class="font-medium">{{ $grade->classroom->name }}</p>
+                                    <span class="text-sm text-gray-500">{{ $grade->subject->name }}</span>
                             </div>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Semester {{ $grade->semester }} - {{ $grade->academic_year }}
+                            </p>
                         </div>
-                    </div>
-                    
-                    <!-- Score and Max Score -->
-                    <div class="form-group mb-5">
-                        <label for="score" class="block text-sm font-medium text-gray-700 mb-1">Nilai</label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-star text-gray-400"></i>
-                            </div>
-                            <input type="number" name="score" id="score" min="0" max="{{ $grade->max_score }}" step="0.01" value="{{ old('score', $grade->score) }}" 
-                                class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300" required>
-                        </div>
-                        <p class="text-gray-500 text-xs mt-1">Nilai maksimum: {{ $grade->max_score }}</p>
-                        @error('score')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <!-- Academic Info -->
-                    <div class="form-group mb-5">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Info Akademik</label>
-                        <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50">
-                            <div class="flex-grow">
-                                <p><span class="font-medium">Semester:</span> {{ $grade->semester }}</p>
-                                <p><span class="font-medium">Tahun Ajaran:</span> {{ $grade->academic_year }}</p>
-                                <p><span class="font-medium">Dibuat:</span> {{ $grade->created_at->format('d M Y H:i') }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Feedback -->
-                    <div class="form-group mb-5 md:col-span-2">
-                        <label for="feedback" class="block text-sm font-medium text-gray-700 mb-1">Catatan/Feedback</label>
-                        <div class="mt-1 rounded-md shadow-sm">
-                            <textarea name="feedback" id="feedback" rows="4" 
-                                class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50 transition-shadow duration-300">{{ old('feedback', $grade->feedback) }}</textarea>
-                        </div>
-                        @error('feedback')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
                 
-                <div class="border-t border-gray-200 mt-8 pt-5">
-                    <div class="flex justify-end">
-                        <a href="{{ route('guru.grades.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300">
-                            <i class="fas fa-times mr-2"></i> Batal
-                        </a>
-                        <button type="submit" class="ml-3 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                            <i class="fas fa-save mr-2"></i> Simpan Perubahan
-                        </button>
+                <!-- Score and Max Score -->
+                <div class="form-group mb-5">
+                    <label for="score" class="block text-sm font-medium text-gray-700 mb-1">Nilai</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-star text-gray-400"></i>
+                        </div>
+                        <input type="number" name="score" id="score" min="0" max="{{ $grade->max_score }}" step="0.01" value="{{ old('score', $grade->score) }}" 
+                               class="pl-10 w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                               required>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-1">Nilai maksimum: {{ $grade->max_score }}</p>
+                    @error('score')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <!-- Academic Info -->
+                <div class="form-group mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Info Akademik</label>
+                    <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50">
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">
+                                        <span class="px-2 py-1 rounded-full text-xs
+                                            @if($grade->type == 'tugas') bg-blue-100 text-blue-800
+                                            @elseif($grade->type == 'ulangan') bg-purple-100 text-purple-800
+                                            @elseif($grade->type == 'ujian') bg-red-100 text-red-800
+                                            @elseif($grade->type == 'keterampilan') bg-green-100 text-green-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            {{ ucfirst($grade->type) }}
+                                        </span>
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">Dibuat: {{ $grade->created_at->format('d/m/Y H:i') }}</p>
+                                </div>
+                                @if($grade->updated_at != $grade->created_at)
+                                    <p class="text-xs text-gray-500">
+                                        Diubah: {{ $grade->updated_at->format('d/m/Y H:i') }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </form>
-        </div>
+                
+                <!-- Feedback -->
+                <div class="form-group mb-5 md:col-span-2">
+                    <label for="feedback" class="block text-sm font-medium text-gray-700 mb-1">Catatan/Feedback</label>
+                    <div class="mt-1 rounded-md shadow-sm">
+                        <textarea name="feedback" id="feedback" rows="4" 
+                                  class="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                        >{{ old('feedback', $grade->feedback) }}</textarea>
+                    </div>
+                    @error('feedback')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 mt-8 pt-5">
+                <div class="flex justify-end">
+                    <a href="{{ route('guru.grades.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300">
+                        <i class="fas fa-times mr-2"></i> Batal
+                    </a>
+                    <button type="submit" class="ml-3 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
 @endsection
 
 @push('styles')

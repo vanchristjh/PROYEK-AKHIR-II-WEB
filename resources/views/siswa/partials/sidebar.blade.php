@@ -1,10 +1,10 @@
 <!-- Dashboard -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-indigo-400 rounded-full"></span>
         Dashboard
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="{{ route('siswa.dashboard') }}" class="sidebar-item flex items-center rounded-lg px-4 py-2.5 group relative text-indigo-100 hover:text-white transition-all duration-200 {{ request()->routeIs('siswa.dashboard') ? 'sidebar-active' : '' }}">
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('siswa.dashboard') ? 'bg-indigo-800' : 'bg-indigo-700/50 group-hover:bg-indigo-700' }} transition-all duration-200">
@@ -20,12 +20,12 @@
 </div>
 
 <!-- Pembelajaran -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-blue-400 rounded-full"></span>
         Pembelajaran
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="{{ route('siswa.schedule.index') }}" class="sidebar-item flex items-center rounded-lg px-4 py-2.5 group relative text-indigo-100 hover:text-white transition-all duration-200 {{ request()->routeIs('siswa.schedule.*') ? 'sidebar-active' : '' }}">
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('siswa.schedule.*') ? 'bg-blue-800' : 'bg-indigo-700/50 group-hover:bg-blue-700/50' }} transition-all duration-200">
@@ -84,12 +84,12 @@
 </div>
 
 <!-- Pencapaian -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-green-400 rounded-full"></span>
         Pencapaian
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="{{ route('siswa.grades.index') }}" class="sidebar-item flex items-center rounded-lg px-4 py-2.5 group relative text-indigo-100 hover:text-white transition-all duration-200 {{ request()->routeIs('siswa.grades.*') ? 'sidebar-active' : '' }}">
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('siswa.grades.*') ? 'bg-green-800' : 'bg-indigo-700/50 group-hover:bg-green-700/50' }} transition-all duration-200">
@@ -105,12 +105,12 @@
 </div>
 
 <!-- Informasi -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-red-400 rounded-full"></span>
         Informasi
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
+    <ul class="px-3 space-y-1 sidebar-items">
         <li>
             <a href="{{ route('siswa.announcements.index') }}" class="sidebar-item flex items-center rounded-lg px-4 py-2.5 group relative text-indigo-100 hover:text-white transition-all duration-200 {{ request()->routeIs('siswa.announcements.*') ? 'sidebar-active' : '' }}">
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('siswa.announcements.*') ? 'bg-red-700' : 'bg-indigo-700/50 group-hover:bg-red-700/50' }} transition-all duration-200">
@@ -126,30 +126,18 @@
 </div>
 
 <!-- Akun -->
-<div class="sidebar-section mb-2">
-    <div class="sidebar-section-header px-4 py-2 text-xs font-semibold text-indigo-200 uppercase tracking-wider flex items-center">
-        <span class="inline-block w-2 h-2 rounded-full bg-purple-400 mr-2"></span>
+<div class="mb-2 sidebar-section">
+    <div class="flex items-center px-4 py-2 text-xs font-semibold tracking-wider text-indigo-200 uppercase sidebar-section-header">
+        <span class="inline-block w-2 h-2 mr-2 bg-purple-400 rounded-full"></span>
         Akun
     </div>
-    <ul class="sidebar-items space-y-1 px-3">
-        <li>
+    <ul class="px-3 space-y-1 sidebar-items">        <li>
             <a href="{{ route('siswa.profile.show') }}" class="sidebar-item {{ request()->routeIs('siswa.profile.*') ? 'sidebar-active text-white' : 'text-indigo-100 hover:text-white transition-all duration-200' }} flex items-center rounded-lg px-4 py-2.5 group">
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('siswa.profile.*') ? 'bg-purple-800' : 'bg-indigo-700/50 group-hover:bg-purple-700/50' }} transition-all duration-200">
                     <i class="fas fa-user-circle text-lg w-5 h-5 flex items-center justify-center {{ request()->routeIs('siswa.profile.*') ? 'text-white' : 'text-indigo-300 group-hover:text-white' }}"></i>
                 </div>
                 <span class="ml-3">Profil Saya</span>
                 @if(request()->routeIs('siswa.profile.*'))
-                    <span class="absolute inset-y-0 left-0 w-1 bg-purple-400 rounded-tr-md rounded-br-md"></span>
-                @endif
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('siswa.settings.index') }}" class="sidebar-item {{ request()->routeIs('siswa.settings.*') ? 'sidebar-active text-white' : 'text-indigo-100 hover:text-white transition-all duration-200' }} flex items-center rounded-lg px-4 py-2.5 group">
-                <div class="p-1.5 rounded-lg {{ request()->routeIs('siswa.settings.*') ? 'bg-purple-800' : 'bg-indigo-700/50 group-hover:bg-purple-700/50' }} transition-all duration-200">
-                    <i class="fas fa-cog text-lg w-5 h-5 flex items-center justify-center {{ request()->routeIs('siswa.settings.*') ? 'text-white' : 'text-indigo-300 group-hover:text-white' }}"></i>
-                </div>
-                <span class="ml-3">Pengaturan Akun</span>
-                @if(request()->routeIs('siswa.settings.*'))
                     <span class="absolute inset-y-0 left-0 w-1 bg-purple-400 rounded-tr-md rounded-br-md"></span>
                 @endif
             </a>

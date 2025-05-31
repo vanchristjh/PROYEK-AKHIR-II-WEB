@@ -7,32 +7,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use App\Models\SchoolClass;
+use App\Models\Classroom;
+use App\Models\Subject;
+use App\Models\User;
+use App\Models\Grade;
+use App\Models\Submission;
 
 class Assignment extends Model
 {
     use HasFactory, SoftDeletes;
-    
-    protected $fillable = [
+      protected $fillable = [
         'title',
         'description',
         'subject_id',
         'teacher_id',
         'deadline',
-        'due_date',
         'file',
         'is_active',
         'max_score',
         'allow_late_submission',
-        'late_submission_penalty',
-        'visibility',
+        'late_submission_penalty'
     ];
-    
-    protected $casts = [
+      protected $casts = [
         'deadline' => 'datetime',
-        'due_date' => 'datetime',
         'is_active' => 'boolean',
         'allow_late_submission' => 'boolean',
-        'late_submission_penalty' => 'integer',
+        'late_submission_penalty' => 'integer'
     ];
     
     protected $appends = [
@@ -59,18 +59,19 @@ class Assignment extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }    /**
      * Get the classrooms this assignment is assigned to
-     */
-    public function classrooms()
+     */    public function classrooms()
     {
-        return $this->belongsToMany(Classroom::class, 'classroom_assignment', 'assignment_id', 'classroom_id');
+        return $this->belongsToMany(Classroom::class, 'assignment_classroom', 'assignment_id', 'classroom_id')
+            ->withTimestamps();
     }
 
     /**
-     * Get the classes this assignment is assigned to
+     * Get the classes (grade levels) this assignment is assigned to
      */
-    public function classes()
+    public function schoolClasses()
     {
-        return $this->belongsToMany(SchoolClass::class, 'assignment_class', 'assignment_id', 'class_id');
+        return $this->belongsToMany(SchoolClass::class, 'assignment_class', 'assignment_id', 'class_id')
+            ->withTimestamps();
     }
 
     /**
@@ -222,5 +223,18 @@ class Assignment extends Model
     public function scopeByTeacher($query, $teacherId)
     {
         return $query->where('teacher_id', $teacherId);
+    }
+    
+    /**
+     * Get the classroom that this assignment is associated with.
+     */
+    public function classes()
+    {
+        // Return an empty collection since the pivot table doesn't exist
+        // This ensures the view won't encounter null when trying to iterate
+        return $this->hasOne(Classroom::class, 'id', 'class_id')
+            ->withDefault(function () {
+                return collect();
+            });
     }
 }

@@ -286,3 +286,77 @@ class AssignmentScoreDistributionSheet implements FromCollection, WithTitle, Wit
         ];
     }
 }
+
+class AssignmentStatisticsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+{
+    protected $assignment;
+    protected $statistics;
+
+    public function __construct($assignment, $statistics)
+    {
+        $this->assignment = $assignment;
+        $this->statistics = $statistics;
+    }
+
+    public function collection()
+    {
+        return collect([
+            [
+                'metric' => 'Total Siswa',
+                'value' => $this->statistics['studentsCount']
+            ],
+            [
+                'metric' => 'Total Pengumpulan',
+                'value' => $this->statistics['submissionsCount']
+            ],
+            [
+                'metric' => 'Rata-rata Nilai',
+                'value' => $this->statistics['averageScore']
+            ],
+            [
+                'metric' => 'Pengumpulan Tepat Waktu',
+                'value' => $this->statistics['onTimeSubmissions']
+            ],
+            [
+                'metric' => 'Pengumpulan Terlambat',
+                'value' => $this->statistics['lateSubmissions']
+            ],
+            [
+                'metric' => 'Belum Mengumpulkan',
+                'value' => $this->statistics['notSubmittedCount']
+            ],
+            [
+                'metric' => 'Sudah Dinilai',
+                'value' => $this->statistics['gradedCount']
+            ],
+            [
+                'metric' => 'Belum Dinilai',
+                'value' => $this->statistics['pendingCount']
+            ],
+        ]);
+    }
+
+    public function headings(): array 
+    {
+        return [
+            'Metrik',
+            'Nilai'
+        ];
+    }
+
+    public function map($row): array
+    {
+        return [
+            $row['metric'],
+            $row['value']
+        ];
+    }
+
+    public function styles($sheet)
+    {
+        return [
+            1 => ['font' => ['bold' => true]],
+            'A' => ['font' => ['bold' => true]],
+        ];
+    }
+}

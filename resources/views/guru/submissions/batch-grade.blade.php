@@ -29,7 +29,7 @@
                     <a href="{{ route('guru.assignments.show', $assignment) }}" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors backdrop-blur-sm">
                         <i class="fas fa-eye mr-2"></i> Detail Tugas
                     </a>
-                    <a href="{{ route('guru.submissions.index', $assignment) }}" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors backdrop-blur-sm">
+                    <a href="{{ route('guru.assignments.submissions.index', $assignment) }}" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg flex items-center shadow-sm transition-colors backdrop-blur-sm">
                         <i class="fas fa-list mr-2"></i> Daftar Pengumpulan
                     </a>
                 </div>
@@ -87,7 +87,7 @@
     </div>
 
     <!-- Batch Grading Form -->
-    <form id="batch-grade-form" action="{{ route('guru.submissions.update-batch') }}" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100">
+    <form id="batch-grade-form" action="{{ route('guru.assignments.submissions.update-batch') }}" method="POST" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100">
         @csrf
         <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
             <div class="flex items-center">
@@ -177,10 +177,10 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{ route('guru.submissions.download', $submission) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded" title="Download">
+                                    <a href="{{ route('guru.assignments.submissions.download', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded" title="Download">
                                         <i class="fas fa-download"></i>
                                     </a>
-                                    <a href="{{ route('guru.submissions.show', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" class="text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded" title="Detail">
+                                    <a href="{{ route('guru.assignments.submissions.show', ['assignment' => $assignment->id, 'submission' => $submission->id]) }}" class="text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded" title="Detail">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </div>

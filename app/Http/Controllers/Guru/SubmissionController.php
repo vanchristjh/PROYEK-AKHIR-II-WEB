@@ -47,22 +47,22 @@ class SubmissionController extends Controller
         $submissions = $query->latest()->paginate(20);
 
         return view('guru.submissions.index', compact('assignment', 'submissions'));
-    }
-
-    /**
+    }    /**
      * Download a submission file.
      *
      * @param  \App\Models\Submission  $submission
      * @return \Illuminate\Http\Response
-     */
-    public function download(Submission $submission)
+     */    public function download(Assignment $assignment, $submission)
     {
         $teacher = Auth::user();
         
-        // Check if the submission belongs to an assignment by this teacher
-        $assignment = Assignment::find($submission->assignment_id);
+        // Get the submission that belongs to this assignment
+        $submission = Submission::where('id', $submission)
+            ->where('assignment_id', $assignment->id)
+            ->firstOrFail();
         
-        if (!$assignment || $assignment->teacher_id != $teacher->id) {
+        // Check if the submission belongs to an assignment by this teacher
+        if ($assignment->teacher_id != $teacher->id) {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengunduh file ini.');
         }
         
@@ -84,15 +84,23 @@ class SubmissionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Submission  $submission
      * @return \Illuminate\Http\Response
-     */
-    public function grade(Request $request, Submission $submission)
+     */    public function grade(Request $request, Assignment $assignment, Submission $submission)
     {
         $teacher = Auth::user();
         
-        // Check if the submission belongs to an assignment by this teacher
-        $assignment = Assignment::find($submission->assignment_id);
+        // Check if this submission belongs to this assignment
+        if ($submission->assignment_id !== $assignment->id) {
+            return redirect()->back()->with('error', 'Pengumpulan tugas tidak ditemukan.');
+        }
         
-        if (!$assignment || $assignment->teacher_id != $teacher->id) {
+        // Check if the submission belongs to an assignment by this teacher
+        if ($assignment->teacher_id !== $teacher->id) {
+            \Log::error('Grade access denied', [
+                'teacher_id' => $teacher->id,
+                'assignment_teacher_id' => $assignment->teacher_id,
+                'submission_id' => $submission->id,
+                'assignment_id' => $submission->assignment_id
+            ]);
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menilai tugas ini.');
         }
         
@@ -192,8 +200,29 @@ class SubmissionController extends Controller
             return redirect()->route('guru.assignments.index')->with('error', 'Anda tidak memiliki akses ke tugas ini.');
         }
         
-        $filename = 'pengumpulan_tugas_' . $assignment->id . '_' . str_slug($assignment->title) . '.xlsx';
-        return Excel::download(new SubmissionsExport($assignment->id), $filename);
+        return Excel::download(new \App\Exports\SubmissionsExport($assignment->id), 'pengumpulan-' . $assignment->id . '.xlsx');
+    }
+
+    /**
+     * Export submissions to PDF
+     */
+    public function exportSubmissionsPdf(Assignment $assignment)
+    {
+        // Security check
+        if ($assignment->teacher_id !== Auth::id()) {
+            return redirect()->route('guru.assignments.index')->with('error', 'Anda tidak memiliki akses ke tugas ini.');
+        }
+
+        $submissions = $assignment->submissions()->with(['student' => function($query) {
+            $query->with('student.class');
+        }])->get();
+
+        $pdf = PDF::loadView('guru.submissions.pdf', [
+            'assignment' => $assignment,
+            'submissions' => $submissions
+        ]);
+
+        return $pdf->download('pengumpulan-' . $assignment->id . '.pdf');
     }
 
     /**
@@ -360,5 +389,48 @@ class SubmissionController extends Controller
         return $month >= 7 
             ? $year . '/' . ($year + 1) 
             : ($year - 1) . '/' . $year;
+    }
+
+    /**
+     * Preview a specific submission for the assignment
+     *
+     * @param int $assignment_id
+     * @param int $submission_id
+     * @return \Illuminate\Http\Response
+     */
+    public function preview($assignment_id, $submission_id)
+    {
+        // Get the assignment
+        $assignment = Assignment::findOrFail($assignment_id);
+        
+        // Get the submission with its related user (student)
+        $submission = Submission::with('user')->findOrFail($submission_id);
+        
+        // Security check: ensure the teacher has access to this submission
+        if ($assignment->teacher_id !== Auth::id()) {
+            return redirect()->route('guru.assignments.index')
+                ->with('error', 'Anda tidak memiliki akses untuk melihat pengumpulan tugas ini.');
+        }
+        
+        // Initialize files as an empty collection instead of null
+        $files = collect();
+        
+        // If the submission has a relationship to files, load them
+        if (method_exists($submission, 'files')) {
+            $files = $submission->files;
+        } else if ($submission->file_path) {
+            // For backwards compatibility if using direct file paths
+            // Create a single-item collection with the file info
+            $files = collect([
+                (object)[
+                    'id' => $submission->id,
+                    'original_name' => $submission->file_name ?? basename($submission->file_path),
+                    'file_path' => $submission->file_path,
+                    'size' => Storage::exists($submission->file_path) ? Storage::size($submission->file_path) : 0
+                ]
+            ]);
+        }
+        
+        return view('guru.submissions.preview', compact('assignment', 'submission', 'files'));
     }
 }

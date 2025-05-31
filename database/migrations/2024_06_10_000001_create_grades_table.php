@@ -19,15 +19,16 @@ return new class extends Migration
         
         Schema::create('grades', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
-            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade'); // Changed to reference users table
             $table->string('semester');
             $table->string('academic_year');
             $table->decimal('assignment_score', 5, 2)->nullable();
             $table->decimal('midterm_score', 5, 2)->nullable();
             $table->decimal('final_score', 5, 2)->nullable();
             $table->decimal('total_score', 5, 2)->nullable();
+            $table->decimal('max_score', 5, 2)->nullable();
             $table->char('grade', 2)->nullable();
             $table->text('comments')->nullable();
             $table->timestamps();

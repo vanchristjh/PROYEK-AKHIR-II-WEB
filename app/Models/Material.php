@@ -161,4 +161,29 @@ class Material extends Model
             default => strtoupper($extension),
         };
     }
+
+    /**
+     * Get the type of file based on its extension
+     */
+    public function getFileType()
+    {
+        if (!$this->file_path) {
+            return 'Unknown';
+        }
+
+        $extension = strtolower(pathinfo($this->file_path, PATHINFO_EXTENSION));
+        
+        switch ($extension) {
+            case 'pdf':
+                return 'PDF Document';
+            case 'ppt':
+            case 'pptx':
+                return 'PowerPoint Presentation';
+            case 'doc':
+            case 'docx':
+                return 'Word Document';
+            default:
+                return 'Other Document';
+        }
+    }
 }

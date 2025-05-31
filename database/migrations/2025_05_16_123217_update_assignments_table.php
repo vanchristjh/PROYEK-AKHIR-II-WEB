@@ -3,14 +3,34 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class UpdateAssignmentsTable extends Migration
 {
     /**
+     * Helper method to get all foreign key constraint names for a given column.
+     */
+    private function getForeignKeysForColumn($table, $column) {
+        $database = DB::connection()->getDatabaseName();
+        $keys = DB::select("
+            SELECT CONSTRAINT_NAME 
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = ?
+            AND TABLE_NAME = ?
+            AND COLUMN_NAME = ?
+            AND REFERENCED_TABLE_NAME IS NOT NULL
+        ", [$database, $table, $column]);
+        return array_map(function($key) {
+            return $key->CONSTRAINT_NAME;
+        }, $keys);
+    }
+
+    /**
      * Run the migrations.
      *
      * @return void
-     */    public function up()
+     */    
+    public function up()
     {
         // Update the existing assignments table with new columns if they don't exist
         if (Schema::hasTable('assignments')) {
@@ -25,17 +45,31 @@ class UpdateAssignmentsTable extends Migration
                 if (!Schema::hasColumn('assignments', 'file_name')) {
                     $table->string('file_name')->nullable();
                 }
+                
                 // Make sure teacher_id references users table
                 if (Schema::hasColumn('assignments', 'teacher_id')) {
-                    // Drop the existing foreign key first if it exists
-                    // Note: In a real scenario you might need to determine the actual constraint name
                     try {
-                        $table->dropForeign(['teacher_id']);
+                        // Check existing foreign keys on this column
+                        $foreignKeys = $this->getForeignKeysForColumn('assignments', 'teacher_id');
+                        
+                        // Drop any existing foreign keys on teacher_id
+                        foreach ($foreignKeys as $key) {
+                            try {
+                                $table->dropForeign($key);
+                            } catch (\Exception $e) {
+                                // Ignore errors when dropping constraints that might not exist
+                            }
+                        }
+                        
+                        // Add the foreign key with a new name
+                        $table->foreign('teacher_id')
+                              ->references('id')
+                              ->on('users')
+                              ->onDelete('cascade');
                     } catch (\Exception $e) {
-                        // Constraint might not exist or have a different name
+                        // Foreign key operation failed - log or handle error
+                        error_log("Error handling teacher_id foreign key: " . $e->getMessage());
                     }
-                    // Add the foreign key pointing to users table
-                    $table->foreign('teacher_id')->references('id')->on('users')->onDelete('cascade');
                 }
             });
         }
@@ -45,14 +79,41 @@ class UpdateAssignmentsTable extends Migration
      * Reverse the migrations.
      *
      * @return void
-     */    public function down()
+     */
+    public function down()
     {
-        // We can't easily undo these changes without knowing what was there before
-        // So this is a safe no-op down method
         if (Schema::hasTable('assignments')) {
             Schema::table('assignments', function (Blueprint $table) {
-                // You could drop specific columns if needed
-                // If you do, be careful about dependencies
+                // Safely try to drop foreign keys and columns
+                try {
+                    if (Schema::hasColumn('assignments', 'classroom_id')) {
+                        $classroomKeys = $this->getForeignKeysForColumn('assignments', 'classroom_id');
+                        foreach ($classroomKeys as $key) {
+                            $table->dropForeign($key);
+                        }
+                        $table->dropColumn('classroom_id');
+                    }
+                    if (Schema::hasColumn('assignments', 'max_score')) {
+                        $table->dropColumn('max_score');
+                    }
+                    if (Schema::hasColumn('assignments', 'file_name')) {
+                        $table->dropColumn('file_name');
+                    }
+                    
+                    // Drop teacher_id foreign key but keep the column
+                    if (Schema::hasColumn('assignments', 'teacher_id')) {
+                        $teacherKeys = $this->getForeignKeysForColumn('assignments', 'teacher_id');
+                        foreach ($teacherKeys as $key) {
+                            try {
+                                $table->dropForeign($key);
+                            } catch (\Exception $e) {
+                                // Ignore errors when dropping constraints that might not exist
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    error_log("Error in down migration: " . $e->getMessage());
+                }
             });
         }
     }

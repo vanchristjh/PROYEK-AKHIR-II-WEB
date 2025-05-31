@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Classroom;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\Assignment;
 
 class SchoolClass extends Model
 {
@@ -18,7 +22,7 @@ class SchoolClass extends Model
         'name',
         'grade',
         'year',
-        'classroom_id', // Add classroom_id to fillable
+        'classroom_id',
     ];
     
     /**
@@ -35,14 +39,11 @@ class SchoolClass extends Model
     public function students()
     {
         return $this->hasMany(Student::class, 'class_id');
-    }
-    
-    /**
+    }    /**
      * Get the subjects for this class.
-     */
-    public function subjects()
+     */    public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'classroom_subject', 'classroom_id', 'subject_id');
+        return $this->belongsToMany(Subject::class, 'class_subject', 'class_id', 'subject_id')->withTimestamps();
     }
 
     /**
@@ -50,6 +51,7 @@ class SchoolClass extends Model
      */
     public function assignments()
     {
-        return $this->belongsToMany(Assignment::class, 'assignment_class', 'class_id', 'assignment_id');
+        return $this->belongsToMany(Assignment::class, 'assignment_class', 'class_id', 'assignment_id')
+            ->withTimestamps();
     }
 }

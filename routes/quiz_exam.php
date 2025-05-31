@@ -45,6 +45,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     // Quiz Management
     Route::resource('quizzes', GuruQuizController::class);
+    Route::post('quizzes/{quiz}/activate', [GuruQuizController::class, 'activate'])->name('quizzes.activate');
+    Route::post('quizzes/{quiz}/deactivate', [GuruQuizController::class, 'deactivate'])->name('quizzes.deactivate');
     Route::get('quizzes/{quiz}/questions', [GuruQuizController::class, 'questions'])->name('quizzes.questions');
     Route::get('quizzes/{quiz}/questions/create', [GuruQuizController::class, 'createQuestion'])->name('quizzes.questions.create');
     Route::post('quizzes/{quiz}/questions', [GuruQuestionController::class, 'storeQuizQuestion'])->name('quizzes.questions.store');
@@ -54,6 +56,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     
     // Quiz Results
     Route::get('quizzes/{quiz}/results', [GuruQuizController::class, 'results'])->name('quizzes.results');
+    Route::get('quizzes/{quiz}/export', [GuruQuizController::class, 'export'])->name('quizzes.export');
     Route::get('quizzes/{quiz}/attempts/{attempt}', [GuruQuizController::class, 'viewAttempt'])->name('quizzes.attempts.view');
     Route::post('quizzes/{quiz}/attempts/{attempt}/answers/{answer}/grade', [GuruQuizController::class, 'gradeEssay'])->name('quizzes.attempts.grade-essay');
     
@@ -64,6 +67,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::post('exams/{exam}/questions', [GuruQuestionController::class, 'storeExamQuestion'])->name('exams.questions.store');
     Route::get('exams/{exam}/questions/{question}/edit', [GuruQuestionController::class, 'editExamQuestion'])->name('exams.questions.edit');
     Route::put('exams/{exam}/questions/{question}', [GuruQuestionController::class, 'updateExamQuestion'])->name('exams.questions.update');
+    Route::delete('exams/questions/{question}', [GuruQuestionController::class, 'destroy'])->name('questions.destroy');
     
     // Exam Results and Grading
     Route::get('exams/{exam}/results', [GuruExamController::class, 'results'])->name('exams.results');
