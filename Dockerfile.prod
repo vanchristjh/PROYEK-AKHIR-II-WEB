@@ -1,4 +1,4 @@
-FROM php:8.1-fpm AS base
+FROM php:8.1-cli AS base
 
 # Set working directory
 WORKDIR /var/www
@@ -46,9 +46,9 @@ COPY --chown=www-data:www-data . /var/www
 
 # Development specific configuration can be added here
 
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
-CMD ["php-fpm"]
+# Expose port 8000 and start PHP's built-in server
+EXPOSE 8000
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
 FROM base AS production
 
@@ -70,6 +70,6 @@ RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 # Change user
 USER www-data
 
-# Expose port and start php-fpm server
-EXPOSE 9000
-CMD ["php-fpm"]
+# Expose port and start PHP's built-in server
+EXPOSE 8000
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.1-cli
 
 # Set working directory
 WORKDIR /var/www
@@ -36,6 +36,6 @@ COPY --chown=www-data:www-data . /var/www
 # Change current user to www-data
 USER www-data
 
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
-CMD ["php-fpm"]
+# Expose port 8000 and start PHP's built-in server
+EXPOSE 8000
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
