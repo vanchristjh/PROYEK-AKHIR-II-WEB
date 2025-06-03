@@ -47,6 +47,9 @@ RUN chown -R www-data:www-data /var/www/html \
 # Configure Git to trust the directory
 RUN git config --global --add safe.directory /var/www/html
 
+# Install Doctrine DBAL for migrations
+RUN composer require doctrine/dbal --no-interaction
+
 # Install composer dependencies (but don't run scripts yet as .env might not be ready)
 RUN composer install --no-scripts --no-dev --optimize-autoloader
 

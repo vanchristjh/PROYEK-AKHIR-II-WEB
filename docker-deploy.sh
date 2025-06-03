@@ -18,13 +18,20 @@ docker-compose exec app git config --global --add safe.directory /var/www/html
 
 # Handle composer dependencies properly
 echo "Setting up Laravel dependencies..."
+docker-compose exec app composer require doctrine/dbal --no-interaction
 docker-compose exec app composer update --no-interaction
 
 # Set up the Laravel application
 echo "Setting up Laravel application..."
 docker-compose exec app php artisan key:generate --force
-docker-compose exec app php artisan config:cache
-docker-compose exec app php artisan migrate --force
+
+# Skip route caching due to route conflicts
+echo "Skipping route cache due to potential naming conflicts..."
+# docker-compose exec app php artisan route:cache
+
+# Run database migrations with troubleshooting options
+echo "Running migrations..."
+docker-compose exec app php artisan migrate --force --verbose
 
 # Create storage link
 echo "Creating storage link..."
