@@ -46,11 +46,99 @@ canvas {
   max-width: 100% !important;
 }
 
-/* Debug outlines */
-.container {
-  border: 1px dashed rgba(0, 0, 255, 0.2);
+/**
+ * Statistics page fixes and enhancements
+ */
+
+/* Make sure all elements are displayed */
+body, html, .container, .bg-white, .chart-container {
+    display: block !important;
+    visibility: visible !important;
 }
 
-.bg-white {
-  background-color: white !important;
+/* Chart container styles */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Animation for number counters */
+@keyframes count-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+    animation: count-up 0.5s ease-out;
+}
+
+/* Hover effects for cards */
+.stat-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Debug styles */
+.debug-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+}
+
+body.debug-mode .debug-info {
+    display: block;
+}
+
+/* Override error display */
+#chartError {
+    display: none !important;
+}
+
+/* Fix for chart rendering */
+canvas {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 250px;
+}
+
+/* Fix Safari specific rendering issues */
+@media not all and (min-resolution:.001dpcm) { 
+    @supports (-webkit-appearance:none) {
+        canvas {
+            height: 300px !important;
+        }
+        .chart-container {
+            min-height: 300px;
+        }
+    }
+}
+
+/* Print styles for PDF exports */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+    
+    .chart-container {
+        height: 400px !important;
+        page-break-inside: avoid;
+    }
+    
+    body {
+        padding: 20px;
+        font-size: 12pt;
+    }
 }

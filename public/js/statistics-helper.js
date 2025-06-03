@@ -88,4 +88,163 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Also run after a delay to catch any post-load issues
     setTimeout(forceVisibility, 2000);
+    
+    // Check for debug mode
+    const isDebugMode = window.location.search.includes('debug=true');
+    
+    if (isDebugMode) {
+        createDebugPanel();
+    }
+    
+    // Add debug logging for chart rendering issues
+    monitorChartRendering();
 });
+
+/**
+ * Attempt to fix common chart rendering issues
+ */
+function monitorChartRendering() {
+    // Check if charts are present
+    const chartCanvas = document.getElementById('submissionChart');
+    if (!chartCanvas) return;
+    
+    // Log chart dimensions
+    console.log("Chart canvas dimensions:", {
+        width: chartCanvas.width,
+        height: chartCanvas.height,
+        clientWidth: chartCanvas.clientWidth,
+        clientHeight: chartCanvas.clientHeight,
+        offsetWidth: chartCanvas.offsetWidth,
+        offsetHeight: chartCanvas.offsetHeight
+    });
+    
+    // Fix chart size issues
+    setTimeout(function() {
+        if (chartCanvas.clientWidth === 0 || chartCanvas.clientHeight === 0) {
+            console.log("Chart canvas has zero dimensions, attempting to fix...");
+            chartCanvas.style.width = '100%';
+            chartCanvas.style.height = '250px';
+            chartCanvas.height = 250;
+            
+            // Force chart redraw if possible
+            if (window.girsipChart && chartCanvas.id) {
+                console.log("Forcing chart redraw...");
+                
+                // Get chart data
+                const chartContainer = chartCanvas.closest('.chart-container') || chartCanvas.parentElement;
+                const loadingElement = chartContainer.querySelector('#chartLoading');
+                if (loadingElement) loadingElement.style.display = 'flex';
+                
+                // Wait a bit and try to redraw
+                setTimeout(function() {
+                    const chartData = window.dummyStatisticsData || window.statisticsData;
+                    if (chartData && chartData.submissionDates) {
+                        const dates = Object.keys(chartData.submissionDates);
+                        const counts = Object.values(chartData.submissionDates);
+                        
+                        window.girsipChart.createBarChart('submissionChart', {
+                            labels: dates,
+                            datasets: [{
+                                label: 'Jumlah Pengumpulan',
+                                data: counts,
+                                backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                                borderColor: 'rgba(79, 70, 229, 1)',
+                                borderWidth: 1
+                            }]
+                        });
+                    }
+                }, 500);
+            }
+        }
+    }, 1000);
+}
+
+/**
+ * Create a debug panel for troubleshooting
+ */
+function createDebugPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'debug-panel';
+    panel.style.position = 'fixed';
+    panel.style.bottom = '10px';
+    panel.style.right = '10px';
+    panel.style.backgroundColor = 'rgba(248, 250, 252, 0.95)';
+    panel.style.border = '1px solid #cbd5e1';
+    panel.style.borderRadius = '4px';
+    panel.style.padding = '10px';
+    panel.style.zIndex = '9999';
+    panel.style.maxWidth = '400px';
+    panel.style.maxHeight = '300px';
+    panel.style.overflow = 'auto';
+    panel.style.fontSize = '12px';
+    
+    // Add title and close button
+    panel.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong>Debug Panel</strong>
+            <button id="closeDebugPanel" style="background:none;border:none;cursor:pointer;color:#ef4444;">×</button>
+        </div>
+        <div id="debugContent">
+            <p>Browser: ${navigator.userAgent}</p>
+            <p>Screen: ${window.innerWidth}x${window.innerHeight}</p>
+            <p>Charts loaded: ${typeof Chart !== 'undefined'}</p>
+            <p>GirsipChart loaded: ${typeof window.girsipChart !== 'undefined'}</p>
+            <button id="refreshCharts" class="px-2 py-1 bg-blue-500 text-white rounded text-xs">Refresh Charts</button>
+        </div>
+    `;
+    
+    document.body.appendChild(panel);
+    
+    // Add event listeners
+    document.getElementById('closeDebugPanel').addEventListener('click', function() {
+        panel.style.display = 'none';
+    });
+    
+    document.getElementById('refreshCharts').addEventListener('click', function() {
+        if (window.girsipChart && document.getElementById('submissionChart')) {
+            try {
+                window.girsipChart.destroyChart('submissionChart');
+                
+                const chartLoading = document.getElementById('chartLoading');
+                if (chartLoading) chartLoading.style.display = 'flex';
+                
+                // Get data and recreate chart
+                const submissionDates = window.dummyStatisticsData?.submissionDates || {};
+                const dates = Object.keys(submissionDates);
+                const counts = Object.values(submissionDates);
+                
+                window.girsipChart.createBarChart('submissionChart', {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Jumlah Pengumpulan',
+                        data: counts,
+                        backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                });
+                
+                document.getElementById('debugContent').innerHTML += '<p class="text-green-500">Charts refreshed!</p>';
+            } catch (e) {
+                document.getElementById('debugContent').innerHTML += `<p class="text-red-500">Error: ${e.message}</p>`;
+            }
+        } else {
+            document.getElementById('debugContent').innerHTML += '<p class="text-red-500">Chart libraries not available</p>';
+        }
+    });
+}
+
+/**
+ * Export data to Excel (dummy implementation)
+ */
+function exportToExcel() {
+    console.log("Export to Excel triggered");
+    alert("Mengekspor data ke Excel... (dummy implementation)");
+    
+    // In a real implementation, this would trigger a download
+    // For now, just simulate with a timeout
+    setTimeout(function() {
+        alert("Export selesai!");
+    }, 1500);
+}

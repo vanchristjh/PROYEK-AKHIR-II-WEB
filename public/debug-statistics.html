@@ -1,213 +1,406 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debug Statistics Page</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f1f5f9;
-        }
-        .debug-panel {
-            background-color: #1e293b;
-            color: #94a3b8;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
         .stat-card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+            transition: all 0.3s ease;
         }
         .stat-card:hover {
-            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .debug-panel {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-top-left-radius: 0.5rem;
+            padding: 1rem;
+            z-index: 50;
+            max-width: 400px;
+            max-height: 300px;
+            overflow: auto;
+        }
+        .debug-panel pre {
+            font-size: 11px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
-<body class="min-h-screen">
-    <div class="container px-4 py-8 mx-auto">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Statistics Debug Page</h1>
-            <p class="text-gray-600">Use this page to test Chart.js and debug layout issues</p>
-        </header>
-        
-        <div class="debug-panel">
-            <p>Chart.js Status: <span id="chart-status">Checking...</span></p>
-            <p>DOM Loaded: <span id="dom-status">Waiting...</span></p>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Debug Statistics Page</h1>
+            <div class="flex space-x-2">
+                <button id="btnRefresh" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh Data
+                </button>
+                <button id="btnToggleDebug" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    <i class="fas fa-bug mr-2"></i>Toggle Debug
+                </button>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2">
-            <div class="p-6 stat-card">
-                <h2 class="mb-4 text-lg font-semibold">Submission Timeline</h2>
-                <div class="relative h-64" id="chart-container" style="border: 1px solid #eee; border-radius: 5px;">
-                    <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
-                        <div class="w-8 h-8 border-4 border-indigo-600 rounded-full animate-spin border-t-transparent"></div>
-                        <span class="ml-3">Loading chart...</span>
+        <!-- Assignment Info -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Informasi Tugas</h2>
+                    <div class="space-y-2" id="assignmentInfo">
+                        Loading...
                     </div>
-                    <canvas id="timeline-chart"></canvas>
                 </div>
-            </div>
-            
-            <div class="p-6 stat-card">
-                <h2 class="mb-4 text-lg font-semibold">Score Distribution</h2>
-                <div class="relative h-64" id="pie-container">
-                    <canvas id="distribution-chart"></canvas>
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Ringkasan Pengumpulan</h2>
+                    <div class="grid grid-cols-2 gap-4" id="submissionSummary">
+                        Loading...
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="flex mt-8 space-x-4">
-            <button id="test-chart" class="px-4 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700">
-                Test Chart Rendering
-            </button>
-            <button id="reload-page" class="px-4 py-2 font-bold text-white bg-gray-600 rounded hover:bg-gray-700">
-                Reload Page
-            </button>
+
+        <!-- Score Distribution -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Distribusi Nilai</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4" id="scoreDistribution">
+                    Loading...
+                </div>
+                <div>
+                    <div class="bg-gray-50 rounded-lg p-6 text-center" id="averageScore">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Timeline Pengumpulan</h2>
+            <div class="relative h-64" style="border: 1px solid #eee; border-radius: 5px;">
+                <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
+                    <div class="w-8 h-8 border-4 border-indigo-600 rounded-full animate-spin border-t-transparent"></div>
+                    <span class="ml-3">Memuat grafik...</span>
+                </div>
+                <canvas id="submissionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-4">Tindakan</h2>
+            <div class="flex flex-wrap gap-4">
+                <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                    <i class="fas fa-list-ul mr-2"></i>Lihat Semua Pengumpulan
+                </button>
+                <button class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+                    <i class="fas fa-edit mr-2"></i>Edit Tugas
+                </button>
+                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    <i class="fas fa-file-excel mr-2"></i>Export Data (Excel)
+                </button>
+                <button class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                    <i class="fas fa-window-restore mr-2"></i>Tampilan Alternatif
+                </button>
+            </div>
+        </div>
+
+        <!-- Debug Panel -->
+        <div id="debugPanel" class="debug-panel hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold">Debug Panel</h3>
+                <button id="btnCloseDebug" class="text-red-500 hover:text-red-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <pre id="debugOutput">No debug information available.</pre>
         </div>
     </div>
+
+    <!-- Load dummy data -->
+    <script src="js/dummy-statistics-data.js"></script>
     
     <script>
-        // Update status when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('dom-status').textContent = 'Loaded ✓';
-            document.getElementById('dom-status').className = 'text-green-400';
+            console.log('Debug statistics page loaded');
             
-            // Check Chart.js status
-            if (typeof Chart !== 'undefined') {
-                document.getElementById('chart-status').textContent = 'Loaded ✓ (version: ' + Chart.version + ')';
-                document.getElementById('chart-status').className = 'text-green-400';
-            } else {
-                document.getElementById('chart-status').textContent = 'Not available ✗';
-                document.getElementById('chart-status').className = 'text-red-400';
-                
-                // Try to load Chart.js
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
-                script.onload = function() {
-                    document.getElementById('chart-status').textContent = 'Loaded (after retry) ✓ (version: ' + Chart.version + ')';
-                    document.getElementById('chart-status').className = 'text-green-400';
-                };
-                script.onerror = function() {
-                    document.getElementById('chart-status').textContent = 'Failed to load ✗';
-                };
-                document.head.appendChild(script);
+            // References
+            const assignmentInfoEl = document.getElementById('assignmentInfo');
+            const submissionSummaryEl = document.getElementById('submissionSummary');
+            const scoreDistributionEl = document.getElementById('scoreDistribution');
+            const averageScoreEl = document.getElementById('averageScore');
+            const chartLoading = document.getElementById('chartLoading');
+            const debugPanel = document.getElementById('debugPanel');
+            const debugOutput = document.getElementById('debugOutput');
+            
+            // Initialize with dummy data
+            initializeWithDummyData();
+            
+            // Event listeners
+            document.getElementById('btnRefresh').addEventListener('click', function() {
+                // Regenerate random data
+                window.dummyStatisticsData.submissions = window.dummyStatisticsData.generateRandomSubmissions(20);
+                initializeWithDummyData();
+            });
+            
+            document.getElementById('btnToggleDebug').addEventListener('click', function() {
+                debugPanel.classList.toggle('hidden');
+                updateDebugOutput();
+            });
+            
+            document.getElementById('btnCloseDebug').addEventListener('click', function() {
+                debugPanel.classList.add('hidden');
+            });
+            
+            // Functions
+            function initializeWithDummyData() {
+                updateAssignmentInfo();
+                updateSubmissionSummary();
+                updateScoreDistribution();
+                createChart();
+                updateDebugOutput();
             }
             
-            // Set up button handlers
-            document.getElementById('test-chart').addEventListener('click', function() {
-                renderTestCharts();
-            });
+            function updateAssignmentInfo() {
+                const data = window.dummyStatisticsData.assignment;
+                assignmentInfoEl.innerHTML = `
+                    <p><span class="font-medium">Mata Pelajaran:</span> ${data.subject}</p>
+                    <p><span class="font-medium">Kelas:</span> 
+                        ${data.classes.map(className => 
+                            `<span class="inline-block px-2 py-1 mr-1 text-xs bg-blue-100 text-blue-800 rounded">${className}</span>`
+                        ).join('')}
+                    </p>
+                    <p><span class="font-medium">Deadline:</span> ${data.deadline}</p>
+                    <p><span class="font-medium">Status:</span> 
+                        ${data.isExpired 
+                            ? '<span class="text-red-600">Berakhir</span>' 
+                            : '<span class="text-green-600">Aktif</span>'}
+                    </p>
+                `;
+            }
             
-            document.getElementById('reload-page').addEventListener('click', function() {
-                window.location.reload();
-            });
+            function updateSubmissionSummary() {
+                const data = window.dummyStatisticsData.summary;
+                submissionSummaryEl.innerHTML = `
+                    <div class="bg-blue-50 rounded-lg p-4 transition-transform duration-200 hover:scale-105 cursor-help" title="Total siswa yang terdaftar di kelas">
+                        <p class="text-sm font-medium text-blue-600">Total Siswa</p>
+                        <div class="mt-2">
+                            <p class="text-2xl font-bold text-blue-800 animate-in">${data.totalStudents}</p>
+                            <div class="w-full h-1.5 bg-blue-200 rounded-full mt-2">
+                                <div class="bg-blue-600 h-1.5 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4 transition-transform duration-200 hover:scale-105 cursor-help" title="Jumlah tugas yang sudah dikumpulkan">
+                        <p class="text-sm font-medium text-green-600">Pengumpulan</p>
+                        <div class="mt-2">
+                            <p class="text-2xl font-bold text-green-800">${data.submissionCount}</p>
+                            <div class="w-full h-1.5 bg-green-200 rounded-full mt-2">
+                                <div class="bg-green-600 h-1.5 rounded-full" style="width: ${data.submissionRate}%"></div>
+                            </div>
+                            <p class="text-sm text-green-600 mt-1">${data.submissionRate}% dari total siswa</p>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-4 transition-transform duration-200 hover:scale-105 cursor-help" title="Tugas yang menunggu penilaian">
+                        <p class="text-sm font-medium text-yellow-600">Belum Dinilai</p>
+                        <div class="mt-2">
+                            <p class="text-2xl font-bold text-yellow-800">${data.pendingCount}</p>
+                            <div class="w-full h-1.5 bg-yellow-200 rounded-full mt-2">
+                                <div class="bg-yellow-600 h-1.5 rounded-full" style="width: ${(data.pendingCount / data.submissionCount) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-4 transition-transform duration-200 hover:scale-105 cursor-help" title="Tugas yang sudah dinilai">
+                        <p class="text-sm font-medium text-purple-600">Sudah Dinilai</p>
+                        <div class="mt-2">
+                            <p class="text-2xl font-bold text-purple-800">${data.gradedCount}</p>
+                            <div class="w-full h-1.5 bg-purple-200 rounded-full mt-2">
+                                <div class="bg-purple-600 h-1.5 rounded-full" style="width: ${data.gradeRate}%"></div>
+                            </div>
+                            <p class="text-sm text-purple-600 mt-1">${data.gradeRate}% dari pengumpulan</p>
+                        </div>
+                    </div>
+                `;
+            }
             
-            // Hide the loading indicator
-            setTimeout(function() {
-                const chartLoading = document.getElementById('chart-loading');
-                if (chartLoading) chartLoading.style.display = 'none';
-            }, 1000);
-        });
-        
-        function renderTestCharts() {
-            // Sample data
-            const dates = ['2025-05-20', '2025-05-21', '2025-05-22', '2025-05-23', '2025-05-24'];
-            const counts = [5, 8, 12, 7, 3];
-            
-            const scoreLabels = ['A (80-100)', 'B (70-79)', 'C (60-69)', 'D (50-59)', 'E (0-49)'];
-            const scoreData = [15, 8, 5, 3, 1];
-            const colors = [
-                'rgba(34, 197, 94, 0.7)', // Green
-                'rgba(59, 130, 246, 0.7)', // Blue
-                'rgba(234, 179, 8, 0.7)',  // Yellow
-                'rgba(249, 115, 22, 0.7)', // Orange
-                'rgba(239, 68, 68, 0.7)'   // Red
-            ];
-            
-            try {
-                // Timeline chart
-                const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+            function updateScoreDistribution() {
+                const data = window.dummyStatisticsData.scoreDistribution;
+                const total = Object.values(data).reduce((a, b) => a + b, 0);
                 
-                if (window.timelineChart) {
-                    window.timelineChart.destroy();
+                scoreDistributionEl.innerHTML = `
+                    <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-600 rounded-sm mr-2"></div>
+                            <span class="font-medium">A (80-100)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-medium text-green-600">${data.a}</span>
+                            <span class="text-gray-500 ml-1">siswa</span>
+                            <div class="w-20 h-2 bg-gray-200 rounded-full ml-2">
+                                <div class="h-2 bg-green-600 rounded-full" style="width: ${(data.a / total) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-600 rounded-sm mr-2"></div>
+                            <span class="font-medium">B (70-79)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-medium text-blue-600">${data.b}</span>
+                            <span class="text-gray-500 ml-1">siswa</span>
+                            <div class="w-20 h-2 bg-gray-200 rounded-full ml-2">
+                                <div class="h-2 bg-blue-600 rounded-full" style="width: ${(data.b / total) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-yellow-600 rounded-sm mr-2"></div>
+                            <span class="font-medium">C (60-69)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-medium text-yellow-600">${data.c}</span>
+                            <span class="text-gray-500 ml-1">siswa</span>
+                            <div class="w-20 h-2 bg-gray-200 rounded-full ml-2">
+                                <div class="h-2 bg-yellow-600 rounded-full" style="width: ${(data.c / total) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-orange-600 rounded-sm mr-2"></div>
+                            <span class="font-medium">D (50-59)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-medium text-orange-600">${data.d}</span>
+                            <span class="text-gray-500 ml-1">siswa</span>
+                            <div class="w-20 h-2 bg-gray-200 rounded-full ml-2">
+                                <div class="h-2 bg-orange-600 rounded-full" style="width: ${(data.d / total) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-red-600 rounded-sm mr-2"></div>
+                            <span class="font-medium">E (0-49)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-medium text-red-600">${data.e}</span>
+                            <span class="text-gray-500 ml-1">siswa</span>
+                            <div class="w-20 h-2 bg-gray-200 rounded-full ml-2">
+                                <div class="h-2 bg-red-600 rounded-full" style="width: ${(data.e / total) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                averageScoreEl.innerHTML = `
+                    <p class="text-sm font-medium text-gray-600 mb-2">Nilai Rata-Rata</p>
+                    <p class="text-4xl font-bold text-gray-800 mb-4">${window.dummyStatisticsData.summary.averageScore}</p>
+                    <div class="w-full h-3 bg-gray-200 rounded-full">
+                        <div class="h-3 bg-blue-600 rounded-full transition-all duration-1000" style="width: ${Math.min(100, window.dummyStatisticsData.summary.averageScore)}%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">dari nilai maksimal 100</p>
+                `;
+            }
+            
+            function createChart() {
+                // Get the canvas
+                const ctx = document.getElementById('submissionChart').getContext('2d');
+                
+                // Get data
+                const dates = Object.keys(window.dummyStatisticsData.submissionDates);
+                const counts = Object.values(window.dummyStatisticsData.submissionDates);
+                
+                // Format dates for display
+                const formattedDates = dates.map(date => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('id-ID', { 
+                        day: 'numeric', 
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                });
+                
+                // Check if chart already exists
+                if (window.submissionChart) {
+                    window.submissionChart.destroy();
                 }
                 
-                window.timelineChart = new Chart(timelineCtx, {
+                // Create new chart
+                window.submissionChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: dates.map(date => {
-                            const d = new Date(date);
-                            return d.toLocaleDateString('id-ID', { 
-                                day: 'numeric', 
-                                month: 'short' 
-                            });
-                        }),
+                        labels: formattedDates,
                         datasets: [{
-                            label: 'Submissions',
+                            label: 'Jumlah Pengumpulan',
                             data: counts,
                             backgroundColor: 'rgba(79, 70, 229, 0.6)',
                             borderColor: 'rgba(79, 70, 229, 1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            maxBarThickness: 50
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 ticks: {
-                                    precision: 0
+                                    precision: 0,
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
                                 }
                             }
-                        }
-                    }
-                });
-                
-                // Distribution chart
-                const distributionCtx = document.getElementById('distribution-chart').getContext('2d');
-                
-                if (window.distributionChart) {
-                    window.distributionChart.destroy();
-                }
-                
-                window.distributionChart = new Chart(distributionCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: scoreLabels,
-                        datasets: [{
-                            data: scoreData,
-                            backgroundColor: colors,
-                            borderWidth: 1,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right'
+                        },
+                        animation: {
+                            onComplete: () => {
+                                if (chartLoading) chartLoading.style.display = 'none';
                             }
                         }
                     }
                 });
-                
-                // Success message
-                alert("Charts rendered successfully!");
-            } catch (error) {
-                console.error("Error rendering charts:", error);
-                alert("Failed to render charts: " + error.message);
             }
-        }
+            
+            function updateDebugOutput() {
+                if (debugPanel.classList.contains('hidden')) return;
+                
+                const debugData = {
+                    timestamp: new Date().toLocaleString(),
+                    dummyData: window.dummyStatisticsData,
+                    chartInitialized: Boolean(window.submissionChart),
+                    browser: navigator.userAgent
+                };
+                
+                debugOutput.textContent = JSON.stringify(debugData, null, 2);
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,280 +1,224 @@
 /**
- * Custom Chart.js implementation for SMAN1-GIRSIP
- * This provides better compatibility and error handling for charts
+ * GirsipChart - A simple chart wrapper for Chart.js
+ * This library provides a safe wrapper for Chart.js with fallbacks for statistics
  */
 
-// Make sure Chart.js is available or attempt to load it
-(function() {
-    if (typeof Chart === 'undefined') {
-        console.log('[CustomChart] Loading Chart.js from CDN');
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
-        document.head.appendChild(script);
-    } else {
-        console.log('[CustomChart] Chart.js already loaded');
-    }
-})();
-
-/**
- * GIRSIP custom chart wrapper
- */
-class GirsipChart {
-    constructor() {
-        this.charts = {};
-        this.chartDefaults = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    titleFont: {
-                        size: 14
-                    },
-                    bodyFont: {
-                        size: 13
-                    }
-                }
-            }
-        };
-    }
+(function(global) {
+    'use strict';
     
-    /**
-     * Safely wait for Chart.js to be loaded
-     * @param {function} callback - Function to run when ready
-     * @param {number} maxAttempts - Maximum attempts to check for Chart
-     */
-    waitForChart(callback, maxAttempts = 10) {
-        let attempts = 0;
+    console.log('GirsipChart library loaded');
+    
+    // Check if Chart.js is available
+    let chartJsLoaded = typeof Chart !== 'undefined';
+    
+    // We'll retry loading Chart.js if it's not available
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    
+    // Store callbacks to execute when Chart.js is ready
+    const callbacks = [];
+    
+    // Create the main object
+    const girsipChart = {
+        // Status
+        isReady: chartJsLoaded,
+        chartInstances: {},
         
-        const checkChart = () => {
-            attempts++;
-            console.log(`[CustomChart] Checking for Chart.js (attempt ${attempts})`);
-            
-            if (typeof Chart !== 'undefined') {
-                console.log('[CustomChart] Chart.js is loaded and available');
-                callback();
+        // Initialize the library
+        init: function() {
+            console.log('GirsipChart: Initializing...');
+            if (!chartJsLoaded) {
+                console.log('GirsipChart: Chart.js not detected, attempting to load it');
+                this.loadChartJs();
+            } else {
+                console.log('GirsipChart: Chart.js already loaded');
+            }
+        },
+        
+        // Load Chart.js dynamically
+        loadChartJs: function() {
+            if (retryCount >= MAX_RETRIES) {
+                console.error('GirsipChart: Failed to load Chart.js after multiple attempts');
                 return;
             }
             
-            if (attempts >= maxAttempts) {
-                console.error('[CustomChart] Chart.js failed to load after multiple attempts');
-                this.showError('chartLoading', 'chartError');
-                return;
-            }
-            
-            setTimeout(checkChart, 300);
-        };
-        
-        checkChart();
-    }
-    
-    /**
-     * Show error in chart container
-     * @param {string} loadingId - ID of loading element
-     * @param {string} errorId - ID of error element
-     */
-    showError(loadingId, errorId) {
-        const loading = document.getElementById(loadingId);
-        const error = document.getElementById(errorId);
-        
-        if (loading) loading.style.display = 'none';
-        if (error) error.style.display = 'flex';
-    }
-    
-    /**
-     * Create a bar chart 
-     * @param {string} id - Canvas element ID
-     * @param {object} data - Chart data
-     * @param {object} options - Chart options
-     * @returns {Chart} The chart instance
-     */
-    createBarChart(id, data, options = {}) {
-        try {
-            const canvas = document.getElementById(id);
-            if (!canvas) {
-                console.error(`[CustomChart] Canvas element with ID ${id} not found`);
-                return null;
-            }
-            
-            const ctx = canvas.getContext('2d');
-            
-            // If chart already exists for this ID, destroy it
-            if (this.charts[id]) {
-                this.charts[id].destroy();
-            }
-            
-            // Merge default options with provided options
-            const chartOptions = Object.assign({}, this.chartDefaults, options);
-            
-            // Create the chart
-            this.charts[id] = new Chart(ctx, {
-                type: 'bar',
-                data: data,
-                options: chartOptions
-            });
-            
-            return this.charts[id];
-        } catch (error) {
-            console.error('[CustomChart] Error creating bar chart:', error);
-            return null;
-        }
-    }
-    
-    /**
-     * Create a pie chart
-     * @param {string} id - Canvas element ID
-     * @param {object} data - Chart data
-     * @param {object} options - Chart options
-     * @returns {Chart} The chart instance
-     */
-    createPieChart(id, data, options = {}) {
-        try {
-            const canvas = document.getElementById(id);
-            if (!canvas) {
-                console.error(`[CustomChart] Canvas element with ID ${id} not found`);
-                return null;
-            }
-            
-            const ctx = canvas.getContext('2d');
-            
-            // If chart already exists for this ID, destroy it
-            if (this.charts[id]) {
-                this.charts[id].destroy();
-            }
-            
-            // Default options for pie charts
-            const pieDefaults = {
-                plugins: {
-                    legend: {
-                        position: 'right'
-                    }
-                }
-            };
-            
-            // Merge default options with provided options
-            const chartOptions = Object.assign({}, this.chartDefaults, pieDefaults, options);
-            
-            // Create the chart
-            this.charts[id] = new Chart(ctx, {
-                type: 'pie',
-                data: data,
-                options: chartOptions
-            });
-            
-            return this.charts[id];
-        } catch (error) {
-            console.error('[CustomChart] Error creating pie chart:', error);
-            return null;
-        }
-    }
-    
-    /**
-     * Create a line chart
-     * @param {string} id - Canvas element ID
-     * @param {object} data - Chart data
-     * @param {object} options - Chart options
-     * @returns {Chart} The chart instance
-     */
-    createLineChart(id, data, options = {}) {
-        try {
-            const canvas = document.getElementById(id);
-            if (!canvas) {
-                console.error(`[CustomChart] Canvas element with ID ${id} not found`);
-                return null;
-            }
-            
-            const ctx = canvas.getContext('2d');
-            
-            // If chart already exists for this ID, destroy it
-            if (this.charts[id]) {
-                this.charts[id].destroy();
-            }
-            
-            // Default options for line charts
-            const lineDefaults = {
-                elements: {
-                    line: {
-                        tension: 0.4
-                    }
-                }
-            };
-            
-            // Merge default options with provided options
-            const chartOptions = Object.assign({}, this.chartDefaults, lineDefaults, options);
-            
-            // Create the chart
-            this.charts[id] = new Chart(ctx, {
-                type: 'line',
-                data: data,
-                options: chartOptions
-            });
-            
-            return this.charts[id];
-        } catch (error) {
-            console.error('[CustomChart] Error creating line chart:', error);
-            return null;
-        }
-    }
-    
-    /**
-     * Safely create any chart with error handling
-     * @param {string} type - Chart type (bar, line, pie, etc)
-     * @param {string} id - Canvas element ID
-     * @param {object} data - Chart data
-     * @param {object} options - Chart options
-     * @returns {Chart} The chart instance
-     */
-    createChart(type, id, data, options = {}) {
-        try {
-            if (typeof Chart === 'undefined') {
-                console.error('[CustomChart] Chart.js is not loaded');
-                return null;
-            }
-            
-            switch (type.toLowerCase()) {
-                case 'bar':
-                    return this.createBarChart(id, data, options);
-                case 'pie':
-                    return this.createPieChart(id, data, options);
-                case 'line':
-                    return this.createLineChart(id, data, options);
-                default:
-                    const canvas = document.getElementById(id);
-                    if (!canvas) {
-                        console.error(`[CustomChart] Canvas element with ID ${id} not found`);
-                        return null;
-                    }
+            try {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
+                script.async = true;
+                
+                script.onload = function() {
+                    console.log('GirsipChart: Chart.js loaded successfully');
+                    chartJsLoaded = true;
+                    girsipChart.isReady = true;
                     
-                    const ctx = canvas.getContext('2d');
-                    
-                    // If chart already exists for this ID, destroy it
-                    if (this.charts[id]) {
-                        this.charts[id].destroy();
-                    }
-                    
-                    // Create the chart
-                    this.charts[id] = new Chart(ctx, {
-                        type: type,
-                        data: data,
-                        options: Object.assign({}, this.chartDefaults, options)
+                    // Execute all callbacks
+                    callbacks.forEach(function(callback) {
+                        try {
+                            callback();
+                        } catch (e) {
+                            console.error('GirsipChart: Error executing callback', e);
+                        }
                     });
                     
-                    return this.charts[id];
+                    // Clear callbacks
+                    callbacks.length = 0;
+                };
+                
+                script.onerror = function() {
+                    console.error('GirsipChart: Failed to load Chart.js');
+                    retryCount++;
+                    
+                    // Try again after a delay
+                    setTimeout(function() {
+                        girsipChart.loadChartJs();
+                    }, 1000 * retryCount);
+                };
+                
+                document.head.appendChild(script);
+            } catch (e) {
+                console.error('GirsipChart: Error during Chart.js loading', e);
             }
-        } catch (error) {
-            console.error(`[CustomChart] Error creating ${type} chart:`, error);
-            return null;
+        },
+        
+        // Wait for Chart.js to be available then execute callback
+        waitForChart: function(callback) {
+            if (this.isReady) {
+                callback();
+            } else {
+                console.log('GirsipChart: Chart.js not ready, queuing callback');
+                callbacks.push(callback);
+            }
+        },
+        
+        // Create a bar chart
+        createBarChart: function(elementId, data, options) {
+            this.waitForChart(function() {
+                try {
+                    const ctx = document.getElementById(elementId).getContext('2d');
+                    
+                    // Check if a chart instance already exists for this canvas
+                    if (girsipChart.chartInstances[elementId]) {
+                        girsipChart.chartInstances[elementId].destroy();
+                    }
+                    
+                    // Create new chart
+                    girsipChart.chartInstances[elementId] = new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: options || {}
+                    });
+                    
+                    console.log('GirsipChart: Bar chart created for', elementId);
+                } catch (e) {
+                    console.error('GirsipChart: Error creating bar chart', e);
+                    
+                    // Try to display error message on the canvas
+                    try {
+                        const canvas = document.getElementById(elementId);
+                        const parent = canvas.parentElement;
+                        
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'chart-error';
+                        errorDiv.style.position = 'absolute';
+                        errorDiv.style.top = '0';
+                        errorDiv.style.left = '0';
+                        errorDiv.style.width = '100%';
+                        errorDiv.style.height = '100%';
+                        errorDiv.style.display = 'flex';
+                        errorDiv.style.alignItems = 'center';
+                        errorDiv.style.justifyContent = 'center';
+                        errorDiv.style.backgroundColor = 'rgba(255,255,255,0.8)';
+                        
+                        errorDiv.innerHTML = `
+                            <div style="text-align:center; color:#e74c3c">
+                                <i class="fas fa-exclamation-circle" style="font-size:24px; margin-bottom:8px"></i>
+                                <p>Gagal memuat grafik</p>
+                                <button id="retryChart_${elementId}" style="background:#3498db; color:white; border:none; padding:5px 10px; border-radius:4px; margin-top:8px;">
+                                    Coba Lagi
+                                </button>
+                            </div>
+                        `;
+                        
+                        parent.style.position = 'relative';
+                        parent.appendChild(errorDiv);
+                        
+                        // Add retry handler
+                        document.getElementById(`retryChart_${elementId}`).addEventListener('click', function() {
+                            parent.removeChild(errorDiv);
+                            girsipChart.createBarChart(elementId, data, options);
+                        });
+                    } catch (displayError) {
+                        console.error('GirsipChart: Error displaying error message', displayError);
+                    }
+                }
+            });
+        },
+        
+        // Create a pie chart
+        createPieChart: function(elementId, data, options) {
+            this.waitForChart(function() {
+                try {
+                    const ctx = document.getElementById(elementId).getContext('2d');
+                    
+                    // Check if a chart instance already exists for this canvas
+                    if (girsipChart.chartInstances[elementId]) {
+                        girsipChart.chartInstances[elementId].destroy();
+                    }
+                    
+                    // Create new chart
+                    girsipChart.chartInstances[elementId] = new Chart(ctx, {
+                        type: 'pie',
+                        data: data,
+                        options: options || {}
+                    });
+                    
+                    console.log('GirsipChart: Pie chart created for', elementId);
+                } catch (e) {
+                    console.error('GirsipChart: Error creating pie chart', e);
+                }
+            });
+        },
+        
+        // Create a line chart
+        createLineChart: function(elementId, data, options) {
+            this.waitForChart(function() {
+                try {
+                    const ctx = document.getElementById(elementId).getContext('2d');
+                    
+                    // Check if a chart instance already exists for this canvas
+                    if (girsipChart.chartInstances[elementId]) {
+                        girsipChart.chartInstances[elementId].destroy();
+                    }
+                    
+                    // Create new chart
+                    girsipChart.chartInstances[elementId] = new Chart(ctx, {
+                        type: 'line',
+                        data: data,
+                        options: options || {}
+                    });
+                    
+                    console.log('GirsipChart: Line chart created for', elementId);
+                } catch (e) {
+                    console.error('GirsipChart: Error creating line chart', e);
+                }
+            });
+        },
+        
+        // Remove a chart instance
+        destroyChart: function(elementId) {
+            if (girsipChart.chartInstances[elementId]) {
+                girsipChart.chartInstances[elementId].destroy();
+                delete girsipChart.chartInstances[elementId];
+                console.log('GirsipChart: Chart destroyed for', elementId);
+            }
         }
-    }
-}
-
-// Create global instance
-window.girsipChart = new GirsipChart();
+    };
+    
+    // Initialize the library
+    girsipChart.init();
+    
+    // Export to global scope
+    global.girsipChart = girsipChart;
+    
+})(window);
