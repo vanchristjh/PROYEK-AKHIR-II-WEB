@@ -1,21 +1,27 @@
 #!/bin/bash
 
-# Build the Docker image and start containers
-docker-compose up -d
+# Stop and remove any existing containers
+echo "Stopping and removing any existing containers..."
+docker-compose down -v
 
-# Wait for the services to start up
-echo "Waiting for services to start up..."
-sleep 10
+# Build and start the Docker containers
+echo "Building and starting Docker containers..."
+docker-compose up -d --build
 
-# Run database migrations
+# Wait for the database to be ready
+echo "Waiting for the database to be ready..."
+sleep 15
+
+# Set up the Laravel application
+echo "Setting up Laravel application..."
+docker-compose exec app php artisan key:generate --force
+docker-compose exec app php artisan config:cache
 docker-compose exec app php artisan migrate --force
 
-# Generate application key if not set
-docker-compose exec app php artisan key:generate --force
-
 # Optimize the application
+echo "Optimizing the application..."
 docker-compose exec app php artisan optimize
 
-# Display information about the running containers
-echo "Application is now running. Container details:"
+# Display information about running containers
+echo "Deployment complete! Your application should be accessible at http://your-vm-ip:8000"
 docker-compose ps
