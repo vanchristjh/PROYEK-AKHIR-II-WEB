@@ -1,4 +1,4 @@
-FROM php:8.1-apache
+FROM php:8.2-apache
 
 # Set working directory
 WORKDIR /var/www/html
@@ -28,9 +28,10 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Enable mod_rewrite
-RUN a2enmod rewrite
+# Enable mod_rewrite and headers
+RUN a2enmod rewrite headers
 
 # Copy Apache configuration
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
@@ -43,8 +44,11 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Run composer install
-RUN composer install --no-dev --optimize-autoloader
+# Configure Git to trust the directory
+RUN git config --global --add safe.directory /var/www/html
+
+# Install composer dependencies (but don't run scripts yet as .env might not be ready)
+RUN composer install --no-scripts --no-dev --optimize-autoloader
 
 # Expose port 80
 EXPOSE 80

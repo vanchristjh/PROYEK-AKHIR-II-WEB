@@ -9,11 +9,13 @@ services:
       - "8000:80"
     environment:
       - APP_ENV=production
+      - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
       - DB_DATABASE=smansa-girsip
       - DB_USERNAME=root
       - DB_PASSWORD=secure_password_here
+      - COMPOSER_ALLOW_SUPERUSER=1
     volumes:
       - ./:/var/www/html
       - ./storage:/var/www/html/storage
